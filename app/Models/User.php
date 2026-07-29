@@ -18,6 +18,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
@@ -29,7 +31,22 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements FilamentUser, HasName, MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasRoles, Notifiable, SoftDeletes, VerifiesEmail;
+    use HasFactory, HasRoles, LogsActivity, Notifiable, SoftDeletes, VerifiesEmail;
+
+    /**
+     * Explicit allow-list, not a deny-list — a new sensitive column added later
+     * (an ID-proof number, say) is excluded by default rather than logged by
+     * accident. Never password, remember_token, or anything encrypted.
+     * See docs/05-CONVENTIONS.md: "never log PAN, card data... redact before logging."
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['name', 'email', 'phone', 'is_active'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->useLogName('users');
+    }
 
     protected static function booted(): void
     {

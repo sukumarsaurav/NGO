@@ -18,4 +18,22 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*'),
         );
+
+        // Sensitive fields never get flashed back to a re-rendered form after
+        // a validation failure. Password fields are Laravel's own default;
+        // the rest are ours per docs/05-CONVENTIONS.md — "never log PAN, card
+        // data, or webhook payloads containing PII."
+        //
+        // This governs session flashing only. Payment/webhook code (M05,
+        // built in Sprint 5+) must redact these same fields explicitly before
+        // any ->log() or Log:: call — this list does not protect that path.
+        $exceptions->dontFlash([
+            'current_password',
+            'password',
+            'password_confirmation',
+            'pan',
+            'card_number',
+            'cvv',
+            'otp',
+        ]);
     })->create();

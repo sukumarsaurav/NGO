@@ -6,6 +6,7 @@ namespace App\Providers;
 
 use App\Enums\UserRole;
 use App\Models\User;
+use App\Services\Settings\SettingsRepository;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -13,7 +14,9 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //
+        // Singleton so all() is memoized in-memory for the lifetime of a
+        // single request, on top of the forever-cache it wraps.
+        $this->app->singleton(SettingsRepository::class);
     }
 
     public function boot(): void

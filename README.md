@@ -99,22 +99,32 @@ composer check   # Pint + Larastan (level 5) + Pest — same as CI
 
 ## Status
 
-**Sprint 1 (Project skeleton & auth) is built and passing**, ahead of the Phase 0 UI/UX foundation
-work in the roadmap — see [`docs/03-ROADMAP.md`](docs/03-ROADMAP.md) for what's still ahead.
+**Sprints 1–2 (Project skeleton & auth; Settings, media, audit) are built and passing**, ahead of the
+Phase 0 UI/UX foundation work in the roadmap — see [`docs/03-ROADMAP.md`](docs/03-ROADMAP.md) for
+what's still ahead.
 
 Done so far:
 - Laravel 13 + Filament v5 installed; two panels (`/admin`, `/manager`) boot, gated by role, dark
   mode off per [`08-DESIGN-SYSTEM.md`](docs/08-DESIGN-SYSTEM.md) §11
 - `users`, `settings`, `webhook_events` + spatie permission/activitylog/medialibrary tables migrated
-- `RolePermissionSeeder` (5 roles, 52 permissions) and `AdminUserSeeder`
+- `RolePermissionSeeder` (5 roles, 52 permissions), `SettingsSeeder` (60 keys across 6 groups),
+  `AdminUserSeeder`
 - `App\Support\Money`, `FinancialYear`, `NumberToWords` — unit tested, including the exact
   roadmap acceptance-criteria strings
 - Public auth (register, login, logout, forgot/reset password, email verification) with
   role-based post-login redirect
+- `App\Services\Settings\SettingsRepository` — forever-cached + in-memory-memoized, typed casting
+  (int/bool/json/file), transparent encryption for PAN, cache busted and `activity_log`'d on every
+  write, refuses to write an unseeded key
+- `OrganisationSettings` Filament page — 6 tabs, PAN masked with a super-admin-gated reveal action
+  (never hydrated into the editable field, so a blank submit can't wipe it), a live 80G
+  expiry/expired banner, money fields edited in rupees and stored in paise
+- `User` activity logging (name/email/phone/is_active only — never password or anything encrypted)
+- Exception handler redaction (`dontFlash`) for password/PAN/card fields
 - Design tokens (`resources/css/tokens.css`, `tailwind.config.js`) wired through Tailwind v4 via
   `@config`, self-hosted Inter + Noto Sans Devanagari
 - CI (`.github/workflows/ci.yml`): Pint, Larastan, Pest on every push/PR
-- 45 tests passing, Larastan level 5 clean, Pint clean
+- **71 tests passing**, Larastan level 5 clean, Pint clean
 
 **Package compatibility spike (Sprint 1) — results:**
 
@@ -127,9 +137,23 @@ Done so far:
 | `barryvdh/laravel-debugbar` | ❌ No version yet supports Laravel 13 — **not installed**, revisit before Sprint 15 |
 | `laravel/pao` (scaffold default) | Removed — not in the architecture spec, was blocking the Pest v4 upgrade |
 
+**Two bugs worth knowing about, found by actually running things:**
+- Filament treats a dot in a field name (`TextInput::make('org.name')`) as a *nested* state path, not
+  a literal key — the naive implementation silently bound every field to nothing. Fixed by naming
+  fields with underscores and mapping to real setting keys only at the form/save boundary
+  (`OrganisationSettings::fname()`/`settingKey()`).
+- `UserFactory` didn't set `is_active` explicitly, so Eloquent's in-memory model after `create()` had
+  no original value for it — the *next* `update()` call, for anything, saw it as spuriously dirty and
+  polluted the activity log with a phantom `is_active` change. Fixed by setting it explicitly in the
+  factory.
+
+Since no MySQL server exists on this machine and `barryvdh/laravel-debugbar` isn't installable on
+Laravel 13 yet, the "settings reads hit cache, not DB" acceptance criterion was verified with a
+`DB::enableQueryLog()` assertion instead of Debugbar — see `SettingsRepositoryTest`.
+
 Two things still need to happen regardless of sequencing: submit the **Razorpay recurring-payments
 application** (2–3 week approval, blocks Sprint 7) and confirm dompdf Devanagari rendering once M04
 starts (Sprint 4).
 
-Not yet started: the Phase 0 design-token *component library* (Blade components beyond the auth
-form primitives built here), and Sprints 2 onward.
+Not yet started: the Phase 0 design-token *component library* (Blade components beyond the auth/
+settings form primitives built here), and Sprint 3 onward.

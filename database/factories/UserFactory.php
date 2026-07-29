@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Models\User;
@@ -30,6 +32,12 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            // Set explicitly, not left to the DB default. Otherwise Eloquent's
+            // in-memory model after create() has no original value for this
+            // column, and the very next ->update() call — for anything —
+            // sees is_active as spuriously dirty (null -> true) and logs a
+            // phantom activity entry. See tests/Feature/Settings/UserActivityLogTest.php.
+            'is_active' => true,
         ];
     }
 
