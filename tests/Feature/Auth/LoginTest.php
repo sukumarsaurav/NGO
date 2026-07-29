@@ -33,6 +33,22 @@ it('rejects an incorrect password without authenticating', function () {
     $response->assertSessionHasErrors('email');
 });
 
+it('rejects a deactivated (is_active=false) user with correct credentials', function () {
+    $user = User::factory()->create([
+        'password' => Hash::make('CorrectPass123!'),
+        'is_active' => false,
+    ]);
+
+    $response = $this->post('/login', [
+        'email' => $user->email,
+        'password' => 'CorrectPass123!',
+    ]);
+
+    $this->assertGuest();
+    // Same generic message as a wrong password — never confirms the account exists.
+    $response->assertSessionHasErrors('email');
+});
+
 it('logs a user out', function () {
     $user = User::factory()->create();
 

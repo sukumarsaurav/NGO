@@ -36,7 +36,15 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        // `is_active` is part of the credential lookup, not a post-hoc check —
+        // Eloquent's UserProvider folds every key except `password` into the
+        // WHERE clause. A suspended/resigned member (DeactivateMember sets
+        // is_active = false — see docs/modules/M03-members.md) gets the same
+        // generic "these credentials do not match" error as a wrong password,
+        // rather than a distinct message that would confirm the account exists.
+        $credentials = [...$this->only('email', 'password'), 'is_active' => true];
+
+        if (! Auth::attempt($credentials, $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([

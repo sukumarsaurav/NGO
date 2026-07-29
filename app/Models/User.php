@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\UserRole;
+use App\Models\Concerns\HasUuid;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasName;
@@ -14,10 +15,10 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Str;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Permission\Traits\HasRoles;
@@ -31,7 +32,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements FilamentUser, HasName, MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasRoles, LogsActivity, Notifiable, SoftDeletes, VerifiesEmail;
+    use HasFactory, HasRoles, HasUuid, LogsActivity, Notifiable, SoftDeletes, VerifiesEmail;
 
     /**
      * Explicit allow-list, not a deny-list — a new sensitive column added later
@@ -46,13 +47,6 @@ class User extends Authenticatable implements FilamentUser, HasName, MustVerifyE
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
             ->useLogName('users');
-    }
-
-    protected static function booted(): void
-    {
-        static::creating(function (self $user): void {
-            $user->uuid ??= (string) Str::uuid();
-        });
     }
 
     /**
@@ -86,6 +80,35 @@ class User extends Authenticatable implements FilamentUser, HasName, MustVerifyE
         }
 
         return '/portal';
+    }
+
+    /**
+     * @return HasOne<Member, $this>
+     */
+    public function member(): HasOne
+    {
+        return $this->hasOne(Member::class);
+    }
+
+    /**
+     * All department IDs this user manages, including sub-departments —
+     * what MemberPolicy scopes a manager to. A user can head more than one
+     * department. Not yet request-cached; see docs/modules/M11-manager-panel.md
+     * (Sprint 13) — "recursive resolution, cached per request (this query
+     * runs on every page)". Introduced early, in Sprint 3, because
+     * MemberPolicy needs it now.
+     *
+     * @return list<int>
+     */
+    public function managedDepartmentIds(): array
+    {
+        return Department::query()
+            ->where('manager_user_id', $this->id)
+            ->get()
+            ->flatMap(fn (Department $department) => $department->selfAndDescendantIds())
+            ->unique()
+            ->values()
+            ->all();
     }
 
     /**

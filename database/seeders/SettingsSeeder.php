@@ -22,6 +22,10 @@ class SettingsSeeder extends Seeder
     private const SETTINGS = [
         // --- organisation ---------------------------------------------------
         ['key' => 'org.name', 'value' => 'Vision Good Work Global Foundation', 'type' => 'string', 'group' => 'organisation'],
+        // Member code prefix, e.g. VGWGF-2026-00123. Not in the original M02
+        // spec — added in Sprint 3 (M03) since MemberCodeGenerator needs it
+        // and nothing about the org should be hard-coded (M02's own rule).
+        ['key' => 'org.member_code_prefix', 'value' => 'VGWGF', 'type' => 'string', 'group' => 'organisation'],
         ['key' => 'org.legal_name', 'value' => null, 'type' => 'string', 'group' => 'organisation'],
         ['key' => 'org.tagline', 'value' => null, 'type' => 'string', 'group' => 'organisation'],
         ['key' => 'org.logo', 'value' => null, 'type' => 'file', 'group' => 'organisation'],

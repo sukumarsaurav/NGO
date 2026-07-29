@@ -141,6 +141,8 @@ class OrganisationSettings extends Page
                         TextInput::make(self::fname('org.name'))->label('Display name')->required()->maxLength(190),
                         TextInput::make(self::fname('org.legal_name'))->label('Full registered name')->maxLength(190),
                         TextInput::make(self::fname('org.tagline'))->maxLength(190),
+                        TextInput::make(self::fname('org.member_code_prefix'))->label('Member code prefix')->required()->maxLength(20)
+                            ->helperText('e.g. VGWGF — produces VGWGF-2026-00123.'),
                         FileUpload::make(self::fname('org.logo'))->image()->disk('public')->directory($this->orgDirectory(...)),
                         FileUpload::make(self::fname('org.logo_dark'))->image()->disk('public')->directory($this->orgDirectory(...)),
                         FileUpload::make(self::fname('org.favicon'))->image()->disk('public')->directory($this->orgDirectory(...)),

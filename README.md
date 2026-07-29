@@ -99,11 +99,56 @@ composer check   # Pint + Larastan (level 5) + Pest — same as CI
 
 ## Status
 
-**Sprints 1–2 (Project skeleton & auth; Settings, media, audit) are built and passing**, ahead of the
-Phase 0 UI/UX foundation work in the roadmap — see [`docs/03-ROADMAP.md`](docs/03-ROADMAP.md) for
-what's still ahead.
+**Sprints 1–3 (Project skeleton & auth; Settings, media, audit; Members) are built and passing**,
+ahead of the Phase 0 UI/UX foundation work in the roadmap — see
+[`docs/03-ROADMAP.md`](docs/03-ROADMAP.md) for what's still ahead.
 
-Done so far:
+**Sprint 3 (Members) added:**
+- `departments` (nested, cycle-checked), `designations`, `members`, `member_code_sequences` —
+  migrations, models, factories
+- `App\Services\Numbering\MemberCodeGenerator` — same row-locked, cold-start-race-safe pattern as
+  the receipt-number generator (`VGWGF-2026-00123`, sequential per calendar year)
+- All 5 actions: `CreateMember`, `UpdateMember`, `AssignDesignation`, `DeactivateMember` (the general
+  status-transition handler — approve/suspend/resign/expire/reinstate, guarded by
+  `MemberStatus::canTransitionTo()`), `BulkImportMembers`
+- `MemberPolicy` — self-service (own record only), manager (own department + sub-departments,
+  IDOR-tested), donor (no access), super-admin/admin (`Gate::before` bypass)
+- `MemberResource` — tabbed form (Personal/Contact/Organisation/ID proof/Internal notes), 1:1 photo
+  crop resized to 400×400, filters (status/department/designation/joined-date/has-photo), bulk
+  actions (export, change department, change status — the last two route through `DeactivateMember`
+  per-record, not a blanket mass-update, so a heterogeneous selection doesn't force an invalid
+  transition on some of them)
+- CSV import (`ImportMembers` page) — dry run, per-row error report, near-miss department/designation
+  suggestions via `similar_text()`, duplicate-email detection (both against the DB and within the
+  same file), never writes on dry run
+- Member portal (`/portal`, `/portal/profile`) — contact-details self-service, explicitly excludes
+  department/designation/status/member_code even if posted
+- `is_active` now actually gates login (folded into the credential lookup, not a post-hoc check) —
+  this is what makes `DeactivateMember`'s "portal access removal" claim true
+- **132 tests passing** (up from 71), Larastan level 5 clean, Pint clean
+
+One deliberate scope reduction: `DepartmentResource`'s table is a flat list with a Parent column, not
+a drag-and-drop tree widget — Filament ships no built-in tree table, and hierarchy is still fully
+enforced (cycle prevention in the form, `selfAndDescendantIds()` for manager scoping); building a real
+tree UI was disproportionate to what Sprint 3 needed.
+
+**Four more real bugs found by running the code, on top of Sprint 2's two:**
+- `User`'s `#[Fillable(...)]` list didn't include `is_active` — `update(['is_active' => ...])` was
+  being silently mass-assignment-filtered. Fixed by having the trusted internal action set the
+  attribute directly rather than widening the fillable surface for a security-sensitive field.
+- Filament's relationship dot-notation (`TextInput::make('user.name')` on a real `BelongsTo`) does
+  **not** auto-hydrate on edit — confirmed by dumping the actual component state, which came back
+  `null` despite a real linked user with data. Fixed with an explicit `mutateFormDataBeforeFill()`.
+  (Different bug from Sprint 2's: that one had no real relation at all; this one has a real relation
+  that Filament still doesn't auto-load for you.)
+- A custom Filament page outside the standard List/Create/Edit trio doesn't inherit resource-policy
+  gating for free — `ImportMembers` needed an explicit `canAccess()` override, caught by a test that
+  expected a manager to get 403 and didn't.
+- A `Select` field backed by enum `::options()` returns the **enum instance itself** in the submitted
+  state, not its scalar value — `MemberStatus::from($data['status'])` threw a `TypeError` until this
+  was accounted for.
+
+Done in Sprints 1–2:
 - Laravel 13 + Filament v5 installed; two panels (`/admin`, `/manager`) boot, gated by role, dark
   mode off per [`08-DESIGN-SYSTEM.md`](docs/08-DESIGN-SYSTEM.md) §11
 - `users`, `settings`, `webhook_events` + spatie permission/activitylog/medialibrary tables migrated
@@ -124,7 +169,6 @@ Done so far:
 - Design tokens (`resources/css/tokens.css`, `tailwind.config.js`) wired through Tailwind v4 via
   `@config`, self-hosted Inter + Noto Sans Devanagari
 - CI (`.github/workflows/ci.yml`): Pint, Larastan, Pest on every push/PR
-- **71 tests passing**, Larastan level 5 clean, Pint clean
 
 **Package compatibility spike (Sprint 1) — results:**
 
