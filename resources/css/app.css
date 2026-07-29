@@ -1,0 +1,13 @@
+@import 'tailwindcss';
+
+/* Load the v3-style theme config (docs/08-DESIGN-SYSTEM.md) via v4's
+   backward-compat directive, rather than duplicating it as @theme. */
+@config '../../tailwind.config.js';
+
+/* Our CSS custom properties — the actual token values Tailwind points to. */
+@import './tokens.css';
+
+@source '../../app/Filament/**/*.php';
+@source '../../app/Livewire/**/*.php';
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';

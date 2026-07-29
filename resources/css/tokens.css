@@ -1,0 +1,233 @@
+/* =====================================================================================
+   Vision Good Work Global Foundation — Design Tokens
+   Executable source of truth. Documented in docs/08-DESIGN-SYSTEM.md.
+
+   THREE LAYERS: primitive -> semantic -> component.
+   Blade and Tailwind classes consume the SEMANTIC layer. Primitives are referenced
+   only inside this file (and in charts that need a specific ramp step).
+
+   Every colour pair in this file has a measured WCAG contrast ratio in the comment
+   beside it. If you add a colour, measure it and record the number.
+   ===================================================================================== */
+
+:root {
+  /* ---------------------------------------------------------------------------------
+     1. PRIMITIVES — raw values, no meaning attached
+     --------------------------------------------------------------------------------- */
+
+  /* Brand — green. The donate button. */
+  --brand-50:  #f2f7f4;
+  --brand-100: #e0ece6;
+  --brand-200: #bcd7ca;
+  --brand-300: #8fbca6;
+  --brand-400: #579b7a;
+  --brand-500: #1f7a4d;   /* white 5.32 */
+  --brand-600: #19643f;   /* white 7.15 */
+  --brand-700: #145133;   /* white 9.31 */
+  --brand-800: #103d26;   /* white 12.23 */
+  --brand-900: #0b291a;   /* white 15.60 */
+
+  /* Accent — amber. Carries DARK text only. */
+  --accent-50:  #fdf8f2;
+  --accent-100: #fbefe0;
+  --accent-200: #f6dcbc;
+  --accent-300: #f0c48e;
+  --accent-400: #e8a756;
+  --accent-500: #e08a1e;  /* dark 5.75 — white FAILS at 2.68, never use it */
+  --accent-600: #b87119;  /* NO TEXT EVER: white 3.88 / dark 3.98 */
+  --accent-700: #945b14;  /* white 5.58 */
+  --accent-800: #70450f;  /* white 8.24 */
+  --accent-900: #4c2f0a;  /* white 12.22 */
+
+  /* Neutrals */
+  --neutral-0:   #ffffff;
+  --neutral-25:  #faf9f6;  /* warm off-white page base */
+  --neutral-50:  #f0eee7;
+  --neutral-200: #d9d4c6;
+  --neutral-400: #8d8a80;
+  --neutral-500: #86816f;
+  --neutral-600: #6b685f;
+  --neutral-700: #55524a;
+  --neutral-900: #21261f;
+
+  /* Status */
+  --red-500:  #c0392b;    /* danger  — white 5.44, on bg 5.17 */
+  --red-600:  #b23a2e;    /* alert   — urgent campaign badge ONLY, white 5.94 */
+  --red-50:   #f9e7e4;
+  --red-800:  #7a2820;    /* on --red-50: 8.17 */
+  --blue-700: #1f5f7a;    /* info    — white 7.06 */
+  --blue-50:  #eef5f8;    /* --blue-700 on this: 6.40 */
+
+  /* ---------------------------------------------------------------------------------
+     2. SEMANTIC — what things mean. USE THESE.
+     --------------------------------------------------------------------------------- */
+
+  /* Surfaces */
+  --color-background:     var(--neutral-25);
+  --color-surface:        var(--neutral-0);
+  --color-surface-muted:  var(--neutral-50);
+
+  /* Text */
+  --color-text:            var(--neutral-900);  /* 14.65 on background */
+  --color-text-muted:      var(--neutral-700);  /* 7.41  */
+  --color-text-placeholder:var(--neutral-600);  /* 5.57 on surface */
+  --color-text-disabled:   var(--neutral-400);  /* 3.28 — WCAG 1.4.3 exempts inactive
+                                                   controls. NEVER for readable content. */
+  --color-text-inverse:    var(--neutral-0);
+
+  /* Lines. Two tokens, deliberately: 3:1 is required for a control boundary,
+     and --color-divider does not meet it. */
+  --color-border:  var(--neutral-500);  /* 3.71 — inputs, selects, any control edge */
+  --color-divider: var(--neutral-200);  /* 1.41 — decorative rules ONLY */
+
+  /* Action */
+  --color-action:        var(--brand-500);
+  --color-action-hover:  var(--brand-600);
+  --color-action-active: var(--brand-700);
+  --color-on-action:     var(--neutral-0);
+
+  --color-link:       var(--brand-600);
+  --color-link-hover: var(--brand-700);
+
+  /* Focus. See §8 of the design system: this is ALWAYS drawn with an offset.
+     Drawn flush against a --color-action button it measures 1.35:1 and vanishes. */
+  --color-focus: var(--brand-600);
+
+  /* Trust — 80G / verified badges */
+  --color-trust-bg:   var(--brand-100);
+  --color-trust-text: var(--brand-800);  /* 10.08 */
+
+  /* Highlight — secondary CTAs, progress fill, category tiles */
+  --color-highlight:    var(--accent-500);
+  --color-on-highlight: var(--neutral-900);  /* 5.75 — dark, never white */
+
+  /* Status — solid (icons, borders, filled buttons) */
+  --color-danger:  var(--red-500);
+  --color-success: var(--brand-500);
+  --color-warning: var(--accent-700);  /* NOT accent-500: Filament puts white on this */
+  --color-info:    var(--blue-700);
+  --color-alert:   var(--red-600);     /* urgent campaign badge only */
+
+  /* Status — tinted surfaces for the Alert component (§10.9) and the urgent badge.
+     Each pair measured; all clear 4.5:1. */
+  --color-danger-bg:    var(--red-50);      --color-danger-text:  #8a2a1f;      /* 7.23 */
+  --color-success-bg:   var(--brand-50);    --color-success-text: var(--brand-700);  /* 8.60 */
+  --color-warning-bg:   var(--accent-50);   --color-warning-text: var(--accent-800); /* 7.81 */
+  --color-info-bg:      var(--blue-50);     --color-info-text:    var(--blue-700);   /* 6.40 */
+  --color-alert-bg:     var(--red-50);      --color-alert-text:   var(--red-800);    /* 8.17 */
+
+  /* Overlay behind modals and the mobile drawer */
+  --color-scrim: var(--scrim);
+
+  /* ---------------------------------------------------------------------------------
+     3. TYPE
+     --------------------------------------------------------------------------------- */
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-deva: 'Noto Sans Devanagari', var(--font-sans);
+
+  --text-xs:   0.75rem;   --leading-xs:   1.4;
+  --text-sm:   0.875rem;  --leading-sm:   1.45;
+  --text-base: 1rem;      --leading-base: 1.6;   /* HARD FLOOR for mobile inputs */
+  --text-lg:   1.125rem;  --leading-lg:   1.55;
+  --text-xl:   1.25rem;   --leading-xl:   1.4;
+  --text-2xl:  1.5rem;    --leading-2xl:  1.3;
+  --text-3xl:  1.875rem;  --leading-3xl:  1.25;
+  --text-4xl:  2.25rem;   --leading-4xl:  1.2;
+  --text-5xl:  3rem;      --leading-5xl:  1.1;
+
+  /* ---------------------------------------------------------------------------------
+     4. SPACE — 4px base
+     --------------------------------------------------------------------------------- */
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;     /* default gap */
+  --space-6:  1.5rem;
+  --space-8:  2rem;
+  --space-12: 3rem;     /* section padding, mobile */
+  --space-16: 4rem;     /* section padding, tablet */
+  --space-24: 6rem;     /* section padding, desktop */
+
+  --container-max: 1200px;
+
+  /* ---------------------------------------------------------------------------------
+     5. RADIUS / ELEVATION
+     Border OR shadow, never both on the same element.
+     Shadows are tinted with the text colour — pure black reads grey and dead
+     against a warm background.
+     --------------------------------------------------------------------------------- */
+  --radius-sm:   6px;    /* inputs */
+  --radius-md:   10px;   /* buttons */
+  --radius-lg:   16px;   /* cards, modals */
+  --radius-full: 9999px; /* pills, avatars */
+
+  --shadow-sm: 0 1px 2px rgb(33 38 31 / 0.06);
+  --shadow-md: 0 4px 12px rgb(33 38 31 / 0.10);
+  --shadow-lg: 0 12px 32px rgb(33 38 31 / 0.16);
+
+  --scrim: rgb(33 38 31 / 0.55);
+
+  /* ---------------------------------------------------------------------------------
+     6. Z-INDEX — seven fixed layers. No raw z-index anywhere else.
+     Gaps of 100 so a layer can be inserted without renumbering.
+     --------------------------------------------------------------------------------- */
+  --z-base:       0;
+  --z-sticky-nav: 100;  /* campaign Products/Story/Updates anchor nav */
+  --z-header:     200;
+  --z-donate-bar: 300;  /* mobile sticky donate bar */
+  --z-float:      400;  /* WhatsApp — ABOVE the donate bar */
+  --z-drawer:     500;
+  --z-modal:      600;  /* checkout */
+  --z-toast:      700;
+
+  /* ---------------------------------------------------------------------------------
+     7. MOTION — animate transform and opacity only.
+     --------------------------------------------------------------------------------- */
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 320ms;
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ---------------------------------------------------------------------------------
+     8. FOCUS RING
+     --------------------------------------------------------------------------------- */
+  --focus-ring-width:  2px;
+  --focus-ring-offset: 2px;
+}
+
+/* =====================================================================================
+   GLOBAL RULES
+   ===================================================================================== */
+
+/* One rule, not per-component. Kills every transition and animation for users who
+   asked for that — including the hero carousel's auto-advance and stat count-ups. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Focus ring. ALWAYS offset — flush against a green button the ring measures 1.35:1
+   and is invisible. The offset exposes the parent background and lifts it to ~6.8:1. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: var(--radius-sm);
+}
+
+/* Money, percentages and counters must not jitter as values change. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+/* Devanagari content — set lang="hi" on the element, not a class. */
+:lang(hi) {
+  font-family: var(--font-deva);
+}
