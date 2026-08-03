@@ -176,9 +176,17 @@ npm ci && npm run build   # only if you're not using the GitHub Action below
 
 **Automated deploy** — `.github/workflows/deploy.yml` (already committed) builds the frontend
 assets on the GitHub Actions runner (reliable Node, unlike shared hosting), `rsync`s
-`public/build/` to the server, then SSHes in and runs `deploy.sh`. It's `workflow_dispatch`-only
-(manual trigger from the Actions tab) until you've run it a few times and trust it — then switch
-its `on:` block to `push: branches: [main]` for deploy-on-merge.
+`public/build/` to the server, then SSHes in and runs `deploy.sh`. It runs **on every push to
+`main`**, and can also be triggered by hand from the Actions tab via `workflow_dispatch`.
+
+Day-to-day flow: work on `develop`, merge `develop` → `main` to release. A `deploy-production`
+concurrency group serialises deploys so two `artisan migrate` runs can never overlap.
+
+> **Do not use hPanel's Advanced → Git deployment for this app.** It only clones the repo and runs
+> `composer install` — there are no post-deploy hooks, so it cannot run `artisan migrate`,
+> `storage:link`, or `optimize`. Any sprint that adds a migration would deploy code expecting
+> tables that don't exist yet. It also overwrites the target directory, which would destroy the
+> server's `.env` and the uploaded media, ID cards, and receipt PDFs under `storage/`.
 
 To wire it up:
 

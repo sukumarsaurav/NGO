@@ -1,10 +1,22 @@
 name: Deploy to Hostinger
 
-# Manual trigger only, on purpose — this pushes straight to production.
-# Flip to `push: branches: [main]` once you've run it manually a few times
-# and trust it.
+# Deploys on every push to main. `workflow_dispatch` is kept so you can still
+# re-run a deploy by hand from the Actions tab without pushing a commit.
+#
+# Day-to-day flow: work on develop, then merge develop -> main to release.
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
+
+# Never let two deploys overlap: deploy.sh runs `artisan migrate`, and two
+# concurrent migration runs against the same database can interleave and
+# half-apply a schema change. Queue them instead — and never cancel one
+# mid-flight, which could leave the site in maintenance mode with `artisan
+# down` already called but `artisan up` never reached.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
 
 jobs:
   deploy:
