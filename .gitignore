@@ -14,7 +14,10 @@
 /.zed
 /auth.json
 /node_modules
-/public/build
+# public/build IS committed, deliberately — Hostinger's Git auto-deploy only
+# runs `composer install`, never `npm run build`, so the compiled assets
+# must ship with the repo itself or every deploy leaves the site unstyled.
+# Rebuild and commit before every push: `npm run build`.
 /public/fonts-manifest.dev.json
 /public/hot
 /public/storage
