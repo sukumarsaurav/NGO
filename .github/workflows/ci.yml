@@ -48,6 +48,12 @@ jobs:
       - name: Build frontend assets
         run: npm run build
 
+      # tailwind.config.js replaces Tailwind's scales rather than extending them, so a
+      # class outside them compiles to nothing with no warning. Diff the templates against
+      # the stylesheet that was just built. See docs/10-UI-UX-AUDIT.md §7.
+      - name: Dead-class check
+        run: npm run check:classes
+
       - name: Directory permissions
         run: chmod -R 777 storage bootstrap/cache
 

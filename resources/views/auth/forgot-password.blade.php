@@ -5,23 +5,18 @@
     </p>
 
     @if (session('status'))
-        <div class="mb-4 rounded-sm bg-success-bg px-4 py-3 text-sm text-success-text" role="status">
-            {{ session('status') }}
-        </div>
+        <x-alert variant="success" class="mb-4">{{ session('status') }}</x-alert>
     @endif
 
     <form method="POST" action="{{ route('password.email') }}" class="space-y-4">
         @csrf
 
-        <div>
-            <x-form.label for="email" required>Email</x-form.label>
-            <x-form.input type="email" name="email" id="email" :value="old('email')" required autofocus />
-        </div>
+        <x-form.field name="email" label="Email" type="email" required autofocus autocomplete="username" />
 
-        <x-button>Email password reset link</x-button>
+        <x-button size="lg" full>Email password reset link</x-button>
     </form>
 
     <p class="mt-6 text-center text-sm text-content-muted">
-        <a href="{{ route('login') }}" class="font-semibold text-link hover:text-link-hover">Back to log in</a>
+        <a href="{{ route('login') }}" class="font-semibold text-link transition-colors duration-fast hover:text-link-hover">Back to log in</a>
     </p>
 </x-layout.guest>

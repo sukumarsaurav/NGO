@@ -28,7 +28,7 @@ class MemberForm
                 // 1:1 crop — ID cards look bad with arbitrary aspect ratios.
                 FileUpload::make('photo_path')
                     ->label('Photo')
-                    ->image()
+                    ->image()->maxSize(2048)
                     ->imageEditor()
                     ->imageEditorAspectRatios(['1:1'])
                     ->imageCropAspectRatio('1:1')

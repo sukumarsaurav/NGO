@@ -7,7 +7,6 @@ namespace App\Services\Numbering;
 use App\Models\MemberCodeSequence;
 use App\Services\Settings\SettingsRepository;
 use Illuminate\Database\ConnectionInterface;
-use Illuminate\Database\UniqueConstraintViolationException;
 
 /**
  * Produces `{PREFIX}-{YYYY}-{NNNNN}`, e.g. `VGWGF-2026-00123`. Sequence is
@@ -48,14 +47,13 @@ final class MemberCodeGenerator
 
     private function ensureSequenceExists(int $year): void
     {
-        try {
-            MemberCodeSequence::query()->firstOrCreate(
-                ['year' => $year],
-                ['last_number' => 0]
-            );
-        } catch (UniqueConstraintViolationException) {
-            // Another request created it between our SELECT and our INSERT —
-            // that is the outcome we wanted anyway.
-        }
+        // firstOrCreate() already survives "another request created it
+        // between our SELECT and our INSERT" itself — Eloquent's
+        // createOrFirst() catches the unique constraint violation and
+        // re-queries for the row a concurrent request just created.
+        MemberCodeSequence::query()->firstOrCreate(
+            ['year' => $year],
+            ['last_number' => 0]
+        );
     }
 }

@@ -60,6 +60,25 @@ return [
             'report' => false,
         ],
 
+        // The nightly-backup off-site copy — see docs/09-BACKUP-RESTORE.md.
+        // Deliberately a separate disk from `s3` above: the backup
+        // destination bucket should never be the same bucket application
+        // code writes public assets to. Standing this up with real
+        // credentials is a Sprint 16 deployment task; config/backup.php
+        // only adds this disk to its `disks` list once BACKUP_AWS_BUCKET is
+        // set, so leaving it unconfigured here is safe.
+        'backup-offsite' => [
+            'driver' => 's3',
+            'key' => env('BACKUP_AWS_ACCESS_KEY_ID'),
+            'secret' => env('BACKUP_AWS_SECRET_ACCESS_KEY'),
+            'region' => env('BACKUP_AWS_DEFAULT_REGION'),
+            'bucket' => env('BACKUP_AWS_BUCKET'),
+            'endpoint' => env('BACKUP_AWS_ENDPOINT'),
+            'use_path_style_endpoint' => env('BACKUP_AWS_USE_PATH_STYLE_ENDPOINT', false),
+            'throw' => false,
+            'report' => false,
+        ],
+
     ],
 
     /*

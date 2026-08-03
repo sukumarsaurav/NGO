@@ -19,7 +19,12 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RolePermissionSeeder::class,
             SettingsSeeder::class,
+            EmailTemplateSeeder::class,
             AdminUserSeeder::class,
+            DocumentTemplateSeeder::class,
+            CampaignCategorySeeder::class,
+            CampaignFaqSeeder::class,
+            HomepageContentSeeder::class,
         ]);
     }
 }

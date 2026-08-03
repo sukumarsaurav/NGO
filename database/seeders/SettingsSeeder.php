@@ -66,6 +66,10 @@ class SettingsSeeder extends Seeder
         ['key' => 'receipt.number_padding', 'value' => 5, 'type' => 'int', 'group' => 'receipt'],
         ['key' => 'receipt.footer_note', 'value' => null, 'type' => 'string', 'group' => 'receipt'],
         ['key' => 'receipt.auto_email', 'value' => true, 'type' => 'bool', 'group' => 'receipt'],
+        // Boilerplate deduction statement printed on every 80G receipt — see
+        // docs/modules/M07-receipts-80g.md's "80G receipt contents" table.
+        // Confirm the exact wording with the NGO's CA before launch.
+        ['key' => 'receipt.80g_deduction_statement', 'value' => 'This donation is eligible for deduction under Section 80G of the Income Tax Act, 1961, subject to the limits and conditions specified therein.', 'type' => 'string', 'group' => 'receipt'],
 
         // --- social --------------------------------------------------------
         ['key' => 'social.facebook', 'value' => null, 'type' => 'string', 'group' => 'social'],

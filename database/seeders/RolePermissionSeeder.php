@@ -95,7 +95,7 @@ class RolePermissionSeeder extends Seeder
         // actions exist at all.
         $manager->syncPermissions([
             'view_members', 'create_members', 'update_members',
-            'issue_documents', 'revoke_documents',
+            'view_documents', 'issue_documents', 'revoke_documents',
             'view_notices', 'publish_notices',
             'view_donations', 'view_campaigns',
             'view_manager_dashboard', 'view_reports',

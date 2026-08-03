@@ -150,6 +150,11 @@
 
   --container-max: 1200px;
 
+  /* Sticky header height. Anything that has to clear the header keys off this rather
+     than repeating `4rem`: in-page anchor targets (see GLOBAL RULES below) and the
+     campaign page's section nav, which stacks directly beneath it. Matches `h-16`. */
+  --header-height: 4rem;
+
   /* ---------------------------------------------------------------------------------
      5. RADIUS / ELEVATION
      Border OR shadow, never both on the same element.
@@ -219,6 +224,57 @@
   outline: var(--focus-ring-width) solid var(--color-focus);
   outline-offset: var(--focus-ring-offset);
   border-radius: var(--radius-sm);
+}
+
+/* Anchor links must not land underneath the sticky header. Without this, jumping to
+   `#story` on a campaign page scrolls the heading to y=0 — directly behind the header.
+   `:target` alone is not enough: `scrollIntoView()` and same-page `<a href="#x">` both
+   honour scroll-margin, and neither necessarily sets :target. */
+[id] {
+  scroll-margin-top: calc(var(--header-height) + var(--space-4));
+}
+
+/* Paired with the `scroll-behavior: auto !important` override in the reduced-motion
+   block above, which has always assumed this exists. */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Sticky header, scrolled state.
+   §5 of the design system: "Border OR shadow, never both on the same element." At rest
+   the header is separated by a divider; once pinned over content it is separated by a
+   shadow instead. The two cross-fade rather than one replacing the other, so the change
+   reads as depth rather than as a border blinking off.
+
+   Both layers are painted at all times and only `opacity` animates, which keeps the
+   transition on the compositor — a `box-shadow` transition would repaint the header on
+   every frame of every scroll that crosses the threshold.
+
+   The `data-stuck` attribute is set by initStickyHeaders() in resources/js/app.js. */
+[data-sticky-header] .header-divider,
+[data-sticky-header] .header-shadow {
+  transition: opacity var(--duration-base) var(--ease-out);
+  will-change: opacity;
+}
+[data-sticky-header] .header-divider { opacity: 1; }
+[data-sticky-header] .header-shadow  { opacity: 0; }
+
+[data-sticky-header][data-stuck] .header-divider { opacity: 0; }
+[data-sticky-header][data-stuck] .header-shadow  { opacity: 1; }
+
+/* Horizontally scrolling nav rail (the portal header below `sm`).
+   The scrollbar is hidden because the rail is only ~44px tall — a visible scrollbar eats a
+   third of it. Scrollability is signalled by the cut-off item instead, and the edge mask
+   softens that cut so a half-scrolled label fades out rather than being sliced mid-letter
+   against the logo. Keyboard and touch scrolling are unaffected. */
+.scroll-rail {
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  mask-image: linear-gradient(to right, transparent 0, #000 var(--space-4), #000 calc(100% - var(--space-4)), transparent 100%);
+}
+.scroll-rail::-webkit-scrollbar {
+  display: none;
 }
 
 /* Money, percentages and counters must not jitter as values change. */

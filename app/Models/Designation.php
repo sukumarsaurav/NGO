@@ -6,6 +6,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Designation extends Model
@@ -24,6 +25,11 @@ class Designation extends Model
         return $this->hasMany(Member::class);
     }
 
-    // letterTemplate() relation is added in M04 (Sprint 4) once
-    // document_templates exists — see the migration's comment.
+    /**
+     * @return BelongsTo<DocumentTemplate, $this>
+     */
+    public function letterTemplate(): BelongsTo
+    {
+        return $this->belongsTo(DocumentTemplate::class, 'letter_template_id');
+    }
 }

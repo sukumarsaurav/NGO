@@ -35,6 +35,9 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->brandLogo(asset('images/branding/logo-horizontal.png'))
+            ->brandLogoHeight('2rem')
+            ->favicon(asset('favicon-32x32.png'))
             // Registers the SAME primitives as resources/css/tokens.css.
             // `warning` maps to accent-700, not accent-500 — Filament renders
             // warning badges with white text, and white on accent-500 is the

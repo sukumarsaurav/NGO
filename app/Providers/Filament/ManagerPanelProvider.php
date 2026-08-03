@@ -37,6 +37,9 @@ class ManagerPanelProvider extends PanelProvider
             ->id('manager')
             ->path('manager')
             ->login()
+            ->brandLogo(asset('images/branding/logo-horizontal.png'))
+            ->brandLogoHeight('2rem')
+            ->favicon(asset('favicon-32x32.png'))
             ->colors([
                 'primary' => Color::hex('#1f7a4d'),
                 'danger' => Color::hex('#c0392b'),

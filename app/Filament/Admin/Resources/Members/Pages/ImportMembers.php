@@ -63,6 +63,7 @@ class ImportMembers extends Page
                 FileUpload::make('csv')
                     ->label('Members CSV')
                     ->acceptedFileTypes(['text/csv', 'text/plain'])
+                    ->maxSize(2048)
                     ->disk('local')
                     ->directory('imports')
                     ->visibility('private')

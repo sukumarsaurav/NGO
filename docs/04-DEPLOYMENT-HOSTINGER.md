@@ -90,10 +90,16 @@ ln -s ~/app/public ~/domains/visiongoodworkglobalfoundation.org/public_html
 
 php artisan storage:link
 
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-php artisan event:cache
+# `optimize` bundles config:cache, route:cache, view:cache, and event:cache
+# into one command. Run it only after .env is fully filled in — config:cache
+# bakes the CURRENT environment's values into a single cached file, and
+# ignores any env() calls outside config files until you clear it again. If
+# .env changes after this, you MUST `artisan optimize:clear` (or
+# config:clear at minimum) before the new values take effect — this bit us
+# once locally when a stale config:cache left over from testing `artisan
+# optimize` caused `artisan test` to run against production-shaped config
+# and hang trying to reach a real mail server.
+php artisan optimize
 
 chmod -R 775 storage bootstrap/cache
 ```
@@ -150,39 +156,49 @@ Schedule::command('sitemap:generate')->daily();
 
 ## 5. Deploy script
 
-`deploy.sh` in the project root:
+`deploy.sh` in the project root (already committed) pulls the latest `main`, reinstalls Composer
+dependencies, migrates, and re-runs `artisan optimize`. It deliberately never runs `npm run build`
+on the server — Node is unreliable on shared hosting, and you don't want a failed `npm ci` to be
+what takes the site down. `APP_DIR` and `PHP_BIN` are overridable via env vars (defaults:
+`$HOME/app` and `php`).
+
+**Manual deploy** — SSH in and run it directly:
 
 ```bash
-#!/usr/bin/env bash
-set -e
-
-APP_DIR=/home/uXXXXXXX/app
-PHP=/usr/bin/php8.3
-
-cd $APP_DIR
-
-$PHP artisan down --render="errors::503" --retry=60
-
-git pull origin main
-composer install --no-dev --optimize-autoloader --no-interaction
-
-$PHP artisan migrate --force
-
-$PHP artisan config:clear && $PHP artisan config:cache
-$PHP artisan route:clear  && $PHP artisan route:cache
-$PHP artisan view:clear   && $PHP artisan view:cache
-$PHP artisan event:clear  && $PHP artisan event:cache
-
-$PHP artisan queue:restart
-$PHP artisan up
-
-echo "Deployed: $(git rev-parse --short HEAD)"
+cd ~/app
+npm ci && npm run build   # only if you're not using the GitHub Action below
+./deploy.sh
 ```
 
-`chmod +x deploy.sh`, then `./deploy.sh` on each release.
+**Automated deploy** — `.github/workflows/deploy.yml` (already committed) builds the frontend
+assets on the GitHub Actions runner (reliable Node, unlike shared hosting), `rsync`s
+`public/build/` to the server, then SSHes in and runs `deploy.sh`. It's `workflow_dispatch`-only
+(manual trigger from the Actions tab) until you've run it a few times and trust it — then switch
+its `on:` block to `push: branches: [main]` for deploy-on-merge.
 
-Build frontend assets locally and commit `public/build/` — Node is unreliable on shared hosting and
-you don't want a failed `npm ci` to be what takes the site down.
+To wire it up:
+
+1. **Generate a dedicated deploy SSH keypair** (don't reuse your personal key):
+   ```bash
+   ssh-keygen -t ed25519 -f ./hostinger_deploy_key -N "" -C "github-actions-deploy"
+   ```
+2. **Install the public key on the server** (you'll be prompted for the account password once):
+   ```bash
+   ssh-copy-id -i ./hostinger_deploy_key.pub -p 65002 uXXXXXXX@your-server-ip
+   ```
+3. **Add repo secrets** (GitHub repo → Settings → Secrets and variables → Actions):
+   - `DEPLOY_SSH_KEY` — contents of `hostinger_deploy_key` (the *private* key)
+   - `DEPLOY_SSH_HOST` — the server IP or hostname
+   - `DEPLOY_SSH_PORT` — `65002`
+   - `DEPLOY_SSH_USER` — your Hostinger SSH username
+   - `DEPLOY_APP_DIR` — the absolute path to the app on the server, e.g. `/home/uXXXXXXX/app`
+4. **Delete the local private key file** once it's in GitHub Secrets — it doesn't need to exist
+   anywhere else.
+5. **Rotate the account password** after key-based access is confirmed working, and disable SSH
+   password auth entirely if your Hostinger plan's control panel allows it — key-only access is
+   the point of doing this.
+6. Run the workflow once from the Actions tab (`workflow_dispatch`) and confirm it completes before
+   switching it to auto-deploy on push.
 
 ## 6. `.env` reference
 
@@ -323,18 +339,39 @@ body { font-family: 'NotoDevanagari', DejaVu Sans, sans-serif; }
 
 ## 10. Backups
 
-Hostinger's own backups are a safety net, not a strategy. Add your own:
+Hostinger's own backups are a safety net, not a strategy. `spatie/laravel-backup` is already wired
+up (`config/backup.php`, `config/filesystems.php`'s `backup-offsite` disk, three scheduled commands
+in `routes/console.php`) — see **`docs/09-BACKUP-RESTORE.md`** for the full setup, the retention
+policy, and the exact restore procedure (already verified once against a real archive, not just
+described).
 
-```bash
-composer require spatie/laravel-backup
-```
+What's left for a production deploy specifically:
 
-`config/backup.php`: include the DB and `storage/app/public`, exclude `vendor` and `node_modules`.
-Schedule nightly, keep 7 daily + 4 weekly + 3 monthly, and ship copies off-site (Google Drive, S3,
-Backblaze — anywhere that isn't the same server).
+- Provision the `BACKUP_AWS_*` env vars (a bucket separate from the app's own `AWS_*`/`s3` disk —
+  the backup destination should never be the bucket public assets are served from).
+- Set `BACKUP_ARCHIVE_PASSWORD` — the dumps contain donor PII and payment metadata.
+- Set `BACKUP_NOTIFICATION_EMAIL` to whoever should get failure/success alerts.
 
-**Restore-test quarterly.** An untested backup is a rumour. Restore into a scratch database and
-confirm donation counts and receipt numbers match production.
+**Restore-test quarterly.** An untested backup is a rumour. Follow `docs/09-BACKUP-RESTORE.md`'s
+restore procedure into a scratch database and confirm donation counts and receipt numbers match
+production.
+
+## 10a. Application-level caching (separate from `artisan optimize`)
+
+`artisan optimize` (config/route/view/event) is framework bootstrap caching — it doesn't touch
+data. A few hot paths also cache query results through `CACHE_STORE` (`config/cache.php` —
+`database` by default on shared hosting, no Redis needed):
+
+- Public campaign listings (`app/Http/Controllers/Public/CampaignController.php`'s `index`,
+  `showCategory`, `monthlyGiving`) — 2 minutes, keyed by sort/category/page. A new campaign or a
+  status change can take up to 2 minutes to appear on these listing pages; the campaign's own
+  detail page (`/campaigns/{slug}`) is never cached, so donation totals there are always live.
+- Admin dashboard widgets (`app/Filament/Admin/Widgets/*`) — 5 minutes, per `Cache::remember` calls
+  in each widget.
+
+Both clear themselves on TTL expiry — no manual cache-busting on donation/campaign writes. If a
+change needs to show up immediately during a demo, `php artisan cache:clear` (safe in production;
+it only drops the `CACHE_STORE`, not `artisan optimize`'s bootstrap caches).
 
 ## 11. Post-deploy checklist
 

@@ -1,0 +1,272 @@
+@props(['title' => null, 'description' => null, 'ogImage' => null, 'noindex' => false, 'titleIsComplete' => false])
+
+@php
+    $settings = app(\App\Services\Settings\SettingsRepository::class);
+    $orgName = $settings->get('org.name') ?: config('app.name');
+    $whatsapp = $settings->get('org.whatsapp');
+
+    // Declared once and rendered twice (header bar + mobile drawer). Previously these
+    // five links were duplicated verbatim, so a nav change had to be made in two places
+    // or the drawer silently drifted out of sync with the bar.
+    $navItems = [
+        [
+            'label' => 'Explore Campaigns',
+            'href' => route('campaigns.index'),
+            'active' => request()->routeIs('campaigns.index', 'campaigns.show', 'campaigns.category'),
+        ],
+        [
+            'label' => 'Monthly Giving',
+            'href' => route('campaigns.monthly-giving'),
+            'active' => request()->routeIs('campaigns.monthly-giving'),
+        ],
+        [
+            'label' => 'Start a Fundraise',
+            'href' => route('fundraiser.show'),
+            'active' => request()->routeIs('fundraiser.*'),
+        ],
+        [
+            'label' => 'About',
+            'href' => route('pages.show', 'about'),
+            'active' => request()->routeIs('pages.show') && request()->route('slug') === 'about',
+        ],
+        [
+            'label' => 'Blog',
+            'href' => route('blog.index'),
+            'active' => request()->routeIs('blog.*'),
+        ],
+    ];
+@endphp
+
+<!DOCTYPE html>
+{{-- No `h-full` on <html>/<body>. `height: 100%` pins them to one viewport, which caps the
+     containing block of `position: sticky` children — the header would unstick and scroll
+     away after 100vh. `min-h-screen` + `flex-col` on <body> keeps the footer at the bottom
+     of short pages without capping the height of long ones. --}}
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{{ $title ? ($titleIsComplete ? $title : $title.' — '.config('app.name')) : config('app.name') }}</title>
+    @if ($description)
+        <meta name="description" content="{{ $description }}">
+    @endif
+    <link rel="canonical" href="{{ url()->current() }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
+    @if ($noindex)
+        <meta name="robots" content="noindex, nofollow">
+    @endif
+    <meta property="og:title" content="{{ $title ?: config('app.name') }}">
+    @if ($description)
+        <meta property="og:description" content="{{ $description }}">
+    @endif
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ url()->current() }}">
+    @if ($ogImage)
+        <meta property="og:image" content="{{ $ogImage }}">
+        <meta name="twitter:card" content="summary_large_image">
+    @endif
+    <script type="application/ld+json">
+        {!! json_encode(array_filter([
+            '@context' => 'https://schema.org',
+            '@type' => 'NGO',
+            'name' => $orgName,
+            'url' => url('/'),
+            'email' => $settings->get('org.email') ?: null,
+            'telephone' => $settings->get('org.phone') ?: null,
+            'sameAs' => array_values(array_filter([
+                $settings->get('social.facebook'),
+                $settings->get('social.instagram'),
+                $settings->get('social.twitter'),
+                $settings->get('social.linkedin'),
+                $settings->get('social.youtube'),
+            ])),
+        ]), JSON_UNESCAPED_SLASHES) !!}
+    </script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @livewireStyles
+</head>
+{{-- `x-data` lives on <body>, not on a wrapper <div>. A wrapper around the header and the
+     drawer is only as tall as the header (the drawer is `fixed`), and a sticky element
+     cannot travel outside its parent's box — so the header scrolled away immediately. --}}
+<body x-data="{ drawerOpen: false }" class="flex min-h-screen flex-col bg-background font-sans text-content antialiased">
+    {{-- First tab stop on every page. Without it a keyboard user re-traverses the logo,
+         five nav links, Login and Donate before reaching the content, on every navigation. --}}
+    <a
+        href="#main"
+        class="sr-only rounded-md bg-action px-4 py-3 text-sm font-semibold text-action-on focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-toast"
+    >
+        Skip to content
+    </a>
+
+        {{-- `data-sticky-header` is picked up by initStickyHeaders() in resources/js/app.js,
+             which sets `data-stuck` once the header pins. The divider/shadow cross-fade
+             that keys off it lives in tokens.css.
+
+             The header does NOT hide on scroll-down. That pattern buys back 64px of
+             viewport, but it also takes the Donate button off screen for the whole time
+             the donor is reading — on a giving site the persistent CTA is worth more than
+             the height. It also does not shrink: the campaign page's section nav pins at
+             `top-16` against this height, and an animated header height would leave that
+             nav overlapping or floating during the transition. --}}
+        <header data-sticky-header class="sticky top-0 z-header h-16 bg-surface">
+            {{-- Resting separator and pinned shadow, cross-faded on `opacity` alone. --}}
+            <div class="header-divider pointer-events-none absolute inset-x-0 bottom-0 h-px bg-line-divider" aria-hidden="true"></div>
+            <div class="header-shadow pointer-events-none absolute inset-0 shadow-md" aria-hidden="true"></div>
+
+            <div class="relative mx-auto flex h-16 max-w-container items-center justify-between px-4 sm:px-6">
+                <a href="{{ url('/') }}" class="flex items-center rounded-sm" aria-label="{{ $orgName }} — home">
+                    {{-- Horizontal logo has room to breathe once the nav links and Donate
+                         button no longer compete with it for width; the compact mark takes
+                         over below that so the header never crowds.
+                         Intrinsic width/height on both: the header is above the fold on
+                         every page, and an unsized logo reflows it as the image lands. --}}
+                    <img src="{{ asset('images/branding/logo-horizontal.png') }}" alt="{{ $orgName }}" width="180" height="32" class="hidden h-8 w-auto sm:block">
+                    <img src="{{ asset('images/branding/logo-mark.png') }}" alt="{{ $orgName }}" width="32" height="32" class="h-8 w-8 sm:hidden">
+                </a>
+
+                <nav class="hidden items-center gap-6 text-sm font-medium lg:flex" aria-label="Main">
+                    @foreach ($navItems as $item)
+                        <a
+                            href="{{ $item['href'] }}"
+                            @if ($item['active']) aria-current="page" @endif
+                            class="group relative py-2 transition-colors duration-fast {{ $item['active'] ? 'text-link' : 'text-content hover:text-link' }}"
+                        >
+                            {{ $item['label'] }}
+                            {{-- Underline indicator. Scale rather than width so it stays on the
+                                 compositor, and origin-left so it wipes in from the start of the
+                                 word instead of growing out of its centre. 2px matches
+                                 --focus-ring-width, so indicator and focus ring read as one system. --}}
+                            <span
+                                aria-hidden="true"
+                                class="absolute inset-x-0 bottom-0 h-[2px] origin-left rounded-full bg-action transition-transform duration-fast ease-out {{ $item['active'] ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100' }}"
+                            ></span>
+                        </a>
+                    @endforeach
+                </nav>
+
+                <div class="flex items-center gap-3">
+                    @guest
+                        <a href="{{ route('login') }}" class="hidden rounded-sm text-sm font-medium text-content transition-colors duration-fast hover:text-link sm:inline">Login</a>
+                    @endguest
+                    <a
+                        href="{{ route('donate.show') }}"
+                        class="inline-flex min-h-touch items-center rounded-md bg-action px-4 py-2 text-sm font-semibold text-action-on transition-colors duration-fast hover:bg-action-hover active:bg-action-active"
+                    >
+                        Donate
+                    </a>
+                    <button
+                        type="button"
+                        @click="drawerOpen = true"
+                        class="-mr-2 inline-flex min-h-touch min-w-touch items-center justify-center rounded-md p-2 text-content transition-colors duration-fast hover:bg-surface-muted lg:hidden"
+                        aria-label="Open menu"
+                        aria-controls="mobile-menu"
+                        :aria-expanded="drawerOpen ? 'true' : 'false'"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        {{-- Scrim fades; the panel slides. Fading a drawer in place reads as an overlay
+             appearing from nowhere, while the slide tells you where it came from and
+             therefore where dismissing it will send it. --}}
+        <div
+            x-show="drawerOpen"
+            x-cloak
+            x-transition:enter="transition-opacity duration-base ease-out"
+            x-transition:enter-start="opacity-0"
+            x-transition:leave="transition-opacity duration-fast ease-in-out"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 z-drawer bg-scrim"
+            @click="drawerOpen = false"
+            aria-hidden="true"
+        ></div>
+
+        {{-- `x-trap.noscroll` does three jobs the previous drawer did none of: it holds
+             focus inside the panel while it is open, locks body scroll so the page behind
+             does not scroll under the drawer, and returns focus to the hamburger on close. --}}
+        <div
+            id="mobile-menu"
+            x-show="drawerOpen"
+            x-cloak
+            x-trap.noscroll="drawerOpen"
+            @keydown.escape.window="drawerOpen = false"
+            x-transition:enter="transition-transform duration-base ease-out"
+            x-transition:enter-start="translate-x-full"
+            x-transition:leave="transition-transform duration-fast ease-in-out"
+            x-transition:leave-end="translate-x-full"
+            class="fixed inset-y-0 right-0 z-drawer flex w-[18rem] flex-col bg-surface shadow-lg"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menu"
+        >
+            <div class="flex h-16 items-center justify-between border-b border-line-divider px-6">
+                <span class="text-sm font-semibold text-content">Menu</span>
+                <button
+                    type="button"
+                    @click="drawerOpen = false"
+                    class="-mr-2 inline-flex min-h-touch min-w-touch items-center justify-center rounded-md p-2 text-content transition-colors duration-fast hover:bg-surface-muted"
+                    aria-label="Close menu"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18" />
+                    </svg>
+                </button>
+            </div>
+
+            <nav class="flex flex-1 flex-col overflow-y-auto p-3 text-base font-medium" aria-label="Main">
+                @foreach ($navItems as $item)
+                    <a
+                        href="{{ $item['href'] }}"
+                        @if ($item['active']) aria-current="page" @endif
+                        class="flex min-h-touch items-center rounded-md px-3 py-3 transition-colors duration-fast {{ $item['active'] ? 'bg-trust text-trust-text' : 'text-content hover:bg-surface-muted' }}"
+                    >
+                        {{ $item['label'] }}
+                    </a>
+                @endforeach
+                @guest
+                    <a href="{{ route('login') }}" class="flex min-h-touch items-center rounded-md px-3 py-3 text-content transition-colors duration-fast hover:bg-surface-muted">Login</a>
+                @endguest
+            </nav>
+
+            {{-- The drawer covers the header, and with it the Donate button. Repeating it
+                 here keeps the primary action reachable from inside the menu. --}}
+            <div class="border-t border-line-divider p-3">
+                <a
+                    href="{{ route('donate.show') }}"
+                    class="flex min-h-touch w-full items-center justify-center rounded-md bg-action px-4 py-3 text-base font-semibold text-action-on transition-colors duration-fast hover:bg-action-hover active:bg-action-active"
+                >
+                    Donate
+                </a>
+            </div>
+    </div>
+
+    {{-- `tabindex="-1"` makes this a valid target for the skip link: without it the browser
+         scrolls but leaves focus at the top of the document. --}}
+    <main id="main" tabindex="-1" class="mx-auto flex w-full max-w-container flex-1 flex-col items-center px-4 py-12 focus:outline-none sm:px-6">
+        {{ $slot }}
+    </main>
+
+    <x-layout.public-footer />
+
+    @if ($whatsapp)
+        <a
+            href="https://wa.me/{{ preg_replace('/\D/', '', $whatsapp) }}"
+            target="_blank"
+            rel="noopener"
+            class="fixed bottom-6 right-6 z-float flex h-16 w-16 items-center justify-center rounded-full bg-success text-2xl text-white shadow-lg"
+            aria-label="Chat on WhatsApp"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-6 w-6" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.28-1.39c1.44.78 3.06 1.2 4.76 1.2h.01c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2zm5.77 14.08c-.24.68-1.4 1.3-1.94 1.38-.5.08-1.12.11-1.81-.11-.42-.13-.95-.31-1.64-.6-2.88-1.24-4.76-4.14-4.9-4.33-.14-.19-1.18-1.57-1.18-3 0-1.42.75-2.12 1.01-2.41.27-.29.58-.36.78-.36.19 0 .39 0 .56.01.18.01.42-.07.65.5.24.58.82 2 .89 2.14.07.14.12.31.02.5-.09.19-.14.31-.28.48-.14.17-.29.37-.42.5-.14.14-.28.29-.12.57.16.28.72 1.19 1.55 1.93 1.06.95 1.96 1.24 2.24 1.38.28.14.44.12.6-.07.16-.19.68-.79.86-1.06.18-.28.36-.23.6-.14.24.09 1.53.72 1.8.86.27.14.44.2.51.31.07.12.07.68-.17 1.36z"/></svg>
+        </a>
+    @endif
+
+    @livewireScripts
+</body>
+</html>

@@ -1,0 +1,31 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Filament\Admin\Resources\PressMentions\Tables;
+
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+
+class PressMentionsTable
+{
+    public static function configure(Table $table): Table
+    {
+        return $table
+            ->columns([
+                TextColumn::make('outlet_name')->searchable(),
+                TextColumn::make('published_on')->date(),
+                IconColumn::make('is_published')->boolean(),
+                TextColumn::make('sort_order')->sortable(),
+            ])
+            ->reorderable('sort_order')
+            ->recordActions([
+                EditAction::make(),
+                DeleteAction::make(),
+            ])
+            ->defaultSort('sort_order');
+    }
+}

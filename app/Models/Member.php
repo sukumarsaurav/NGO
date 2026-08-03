@@ -11,7 +11,9 @@ use Database\Factories\MemberFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -21,6 +23,9 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property MemberStatus $status Larastan doesn't yet infer enum casts declared
  *                                via the `casts()` method — see the identical note on Setting::$type.
  * @property Gender|null $gender
+ * @property Carbon|null $date_of_birth
+ * @property Carbon|null $joined_on
+ * @property Carbon|null $valid_until
  */
 class Member extends Model
 {
@@ -71,14 +76,28 @@ class Member extends Model
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return BelongsTo<Department, $this>
+     */
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class);
     }
 
+    /**
+     * @return BelongsTo<Designation, $this>
+     */
     public function designation(): BelongsTo
     {
         return $this->belongsTo(Designation::class);
+    }
+
+    /**
+     * @return HasMany<IssuedDocument, $this>
+     */
+    public function issuedDocuments(): HasMany
+    {
+        return $this->hasMany(IssuedDocument::class);
     }
 
     public function isActive(): bool

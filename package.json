@@ -4,7 +4,8 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "check:classes": "node scripts/check-dead-classes.mjs"
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.11",

@@ -143,9 +143,9 @@ class OrganisationSettings extends Page
                         TextInput::make(self::fname('org.tagline'))->maxLength(190),
                         TextInput::make(self::fname('org.member_code_prefix'))->label('Member code prefix')->required()->maxLength(20)
                             ->helperText('e.g. VGWGF — produces VGWGF-2026-00123.'),
-                        FileUpload::make(self::fname('org.logo'))->image()->disk('public')->directory($this->orgDirectory(...)),
-                        FileUpload::make(self::fname('org.logo_dark'))->image()->disk('public')->directory($this->orgDirectory(...)),
-                        FileUpload::make(self::fname('org.favicon'))->image()->disk('public')->directory($this->orgDirectory(...)),
+                        FileUpload::make(self::fname('org.logo'))->image()->maxSize(2048)->disk('public')->directory($this->orgDirectory(...)),
+                        FileUpload::make(self::fname('org.logo_dark'))->image()->maxSize(2048)->disk('public')->directory($this->orgDirectory(...)),
+                        FileUpload::make(self::fname('org.favicon'))->image()->maxSize(2048)->disk('public')->directory($this->orgDirectory(...)),
                     ])
                     ->columns(2),
 
@@ -189,8 +189,8 @@ class OrganisationSettings extends Page
                     ->schema([
                         TextInput::make(self::fname('org.authorised_signatory_name'))->maxLength(190),
                         TextInput::make(self::fname('org.authorised_signatory_designation'))->maxLength(190),
-                        FileUpload::make(self::fname('org.signature_image'))->image()->disk('public')->directory($this->orgDirectory(...)),
-                        FileUpload::make(self::fname('org.seal_image'))->image()->disk('public')->directory($this->orgDirectory(...)),
+                        FileUpload::make(self::fname('org.signature_image'))->image()->maxSize(2048)->disk('public')->directory($this->orgDirectory(...)),
+                        FileUpload::make(self::fname('org.seal_image'))->image()->maxSize(2048)->disk('public')->directory($this->orgDirectory(...)),
                     ])
                     ->columns(2),
             ]);
@@ -335,7 +335,7 @@ class OrganisationSettings extends Page
                     ->schema([
                         TextInput::make(self::fname('homepage.serve_heading'))->maxLength(190),
                         Textarea::make(self::fname('homepage.serve_body')),
-                        FileUpload::make(self::fname('homepage.serve_image'))->image()->disk('public')->directory($this->orgDirectory(...)),
+                        FileUpload::make(self::fname('homepage.serve_image'))->image()->maxSize(2048)->disk('public')->directory($this->orgDirectory(...)),
                     ]),
 
                 Section::make('Monthly giving promo')
@@ -374,7 +374,7 @@ class OrganisationSettings extends Page
                         TextInput::make(self::fname('seo.meta_title'))->maxLength(60)
                             ->helperText('Kept under 60 characters — see docs/07-SEO.md §4.'),
                         Textarea::make(self::fname('seo.meta_description'))->maxLength(160),
-                        FileUpload::make(self::fname('seo.og_image'))->image()->disk('public')->directory($this->orgDirectory(...))
+                        FileUpload::make(self::fname('seo.og_image'))->image()->maxSize(2048)->disk('public')->directory($this->orgDirectory(...))
                             ->helperText('1200×630 — see docs/07-SEO.md.'),
                         TextInput::make(self::fname('seo.google_analytics_id')),
                         TextInput::make(self::fname('seo.google_site_verification')),

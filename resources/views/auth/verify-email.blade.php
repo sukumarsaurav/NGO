@@ -5,20 +5,20 @@
     </p>
 
     @if (session('status') === 'verification-link-sent')
-        <div class="mb-4 rounded-sm bg-success-bg px-4 py-3 text-sm text-success-text" role="status">
+        <x-alert variant="success" class="mb-4">
             A new verification link has been sent to the email address you provided during registration.
-        </div>
+        </x-alert>
     @endif
 
     <div class="flex flex-col gap-3">
         <form method="POST" action="{{ route('verification.send') }}">
             @csrf
-            <x-button>Resend verification email</x-button>
+            <x-button size="lg" full>Resend verification email</x-button>
         </form>
 
         <form method="POST" action="{{ route('logout') }}">
             @csrf
-            <x-button variant="secondary">Log out</x-button>
+            <x-button variant="secondary" size="lg" full>Log out</x-button>
         </form>
     </div>
 </x-layout.guest>

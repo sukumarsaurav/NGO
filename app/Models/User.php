@@ -34,6 +34,9 @@ class User extends Authenticatable implements FilamentUser, HasName, MustVerifyE
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasRoles, HasUuid, LogsActivity, Notifiable, SoftDeletes, VerifiesEmail;
 
+    /** @var list<int>|null Request-lifetime memoization for managedDepartmentIds(). */
+    private ?array $managedDepartmentIdsCache = null;
+
     /**
      * Explicit allow-list, not a deny-list — a new sensitive column added later
      * (an ID-proof number, say) is excluded by default rather than logged by
@@ -91,18 +94,28 @@ class User extends Authenticatable implements FilamentUser, HasName, MustVerifyE
     }
 
     /**
+     * @return HasOne<Donor, $this>
+     */
+    public function donor(): HasOne
+    {
+        return $this->hasOne(Donor::class);
+    }
+
+    /**
      * All department IDs this user manages, including sub-departments —
-     * what MemberPolicy scopes a manager to. A user can head more than one
-     * department. Not yet request-cached; see docs/modules/M11-manager-panel.md
-     * (Sprint 13) — "recursive resolution, cached per request (this query
-     * runs on every page)". Introduced early, in Sprint 3, because
-     * MemberPolicy needs it now.
+     * what MemberPolicy and the Manager panel's resource scopes both use.
+     * A user can head more than one department. Memoized on the instance:
+     * this runs on every page in the manager panel (dashboard widget, every
+     * resource's query scope, every policy check), and `auth()->user()`
+     * resolves to the same instance for the lifetime of a request. See
+     * docs/modules/M11-manager-panel.md: "recursive resolution, cached per
+     * request."
      *
      * @return list<int>
      */
     public function managedDepartmentIds(): array
     {
-        return Department::query()
+        return $this->managedDepartmentIdsCache ??= Department::query()
             ->where('manager_user_id', $this->id)
             ->get()
             ->flatMap(fn (Department $department) => $department->selfAndDescendantIds())

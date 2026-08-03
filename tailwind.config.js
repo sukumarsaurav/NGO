@@ -60,6 +60,9 @@ export default {
                 DEFAULT: 'var(--color-link)',
                 hover: 'var(--color-link-hover)',
             },
+            // §10.2 wants a focused field's *border* to move to the focus colour, on top of
+            // the ring tokens.css draws. The token existed; Tailwind had no name for it.
+            focus: 'var(--color-focus)',
             trust: {
                 DEFAULT: 'var(--color-trust-bg)',
                 text: 'var(--color-trust-text)',
