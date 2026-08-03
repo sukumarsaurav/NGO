@@ -18,7 +18,7 @@ structure from [trueimpactfoundation.org](https://trueimpactfoundation.org/), br
 |---|---|
 | Organisation | Vision Good Work Global Foundation |
 | Production domain | https://visiongoodworkglobalfoundation.org |
-| Framework | Laravel 13 (PHP 8.3+) |
+| Framework | Laravel 13 (PHP 8.4+) |
 | Admin panel | Filament v5 |
 | Frontend | Blade + Tailwind CSS + Alpine.js |
 | Database | MySQL 8 |

@@ -15,8 +15,12 @@ Laravel on Hostinger works well **provided** the plan gives you SSH, Composer, a
 either (a) queue latency becomes visible to donors, or (b) monthly donation volume passes roughly
 1,000 transactions. Write the deploy script so the migration is a weekend, not a project.
 
-Requirements to verify before you commit: **PHP 8.3+**, MySQL 8, `pdo_mysql`, `mbstring`, `openssl`,
+Requirements to verify before you commit: **PHP 8.4+**, MySQL 8, `pdo_mysql`, `mbstring`, `openssl`,
 `gd`, `zip`, `bcmath`, `fileinfo`, `intl`, `exif`.
+
+PHP 8.4 is a hard floor, not a preference: Laravel 13 pulls in Symfony 8 components that declare
+`php: >=8.4.1`. On PHP 8.3 `composer install` fails the platform check outright with "Your lock file
+does not contain a compatible set of packages" — verify with `composer why-not php 8.3.0`.
 
 ## 2. Directory layout
 
@@ -112,10 +116,10 @@ Hostinger shared plans have no Supervisor, so the queue worker runs from cron. T
 
 ```cron
 # Laravel scheduler — every minute
-* * * * * cd /home/uXXXXXXX/app && /usr/bin/php8.3 artisan schedule:run >> /dev/null 2>&1
+* * * * * cd /home/uXXXXXXX/app && /usr/bin/php8.4 artisan schedule:run >> /dev/null 2>&1
 
 # Queue worker — drains the queue then exits, so cron can restart it cleanly
-* * * * * cd /home/uXXXXXXX/app && /usr/bin/php8.3 artisan queue:work --stop-when-empty --tries=3 --timeout=90 --max-time=55 >> storage/logs/queue.log 2>&1
+* * * * * cd /home/uXXXXXXX/app && /usr/bin/php8.4 artisan queue:work --stop-when-empty --tries=3 --timeout=90 --max-time=55 >> storage/logs/queue.log 2>&1
 ```
 
 **Why `--stop-when-empty` and `--max-time=55`:** a long-running `queue:work` on shared hosting gets
