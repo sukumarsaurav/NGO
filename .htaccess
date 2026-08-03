@@ -1,0 +1,39 @@
+# Hostinger's Git auto-deploy has no "public folder as web root" option —
+# it clones the whole repo straight into public_html, so app/, vendor/,
+# config/, etc. all end up siblings of public/ in the actual document root.
+# This file makes that survivable: everything is transparently routed
+# through public/ as Laravel's front controller, and anything that must
+# never be served directly (.env, vendor/, app/, ...) is blocked outright.
+#
+# This file MUST stay tracked in the repo at the root — it deploys with
+# every push exactly like public/build/ does. An .htaccess uploaded by hand
+# via File Manager would be wiped out on the next deploy.
+
+# --- Block direct access to everything except public/ -----------------------
+
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Block direct requests into the non-public directories outright —
+    # belt-and-braces alongside the rewrite below, in case something
+    # requests one of these paths in a way the rewrite doesn't catch.
+    RewriteRule ^(app|bootstrap|config|database|docs|lang|resources|routes|storage|tests|vendor|node_modules)(/|$) - [F,L]
+
+    # Already inside public/ — let it through as-is; Laravel's own
+    # public/.htaccess takes over from here (this is what avoids an
+    # infinite rewrite loop, and what lets public/build/... etc resolve to
+    # real files instead of being redirected again).
+    RewriteCond %{REQUEST_URI} ^/public/
+    RewriteRule ^ - [L]
+
+    # Everything else — including the bare "/" homepage request, where
+    # REQUEST_FILENAME resolves to the document root itself (a directory
+    # that "exists"), so this deliberately does NOT gate on -f/-d the way
+    # public/.htaccess's own front-controller rule does. Every request
+    # that isn't already under /public/ gets routed there unconditionally.
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
