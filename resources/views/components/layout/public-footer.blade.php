@@ -18,6 +18,35 @@
 @endphp
 
 <footer class="border-t border-line-divider bg-surface">
+    {{-- Newsletter signup — dark-tinted photo band, moved here from the homepage so it
+         appears on every page rather than only the homepage. --}}
+    <section class="relative overflow-hidden">
+        <img
+            src="{{ asset('images/hero-community.png') }}"
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+            class="absolute inset-0 h-full w-full object-cover"
+        >
+        <div class="absolute inset-0 bg-brand-900/80"></div>
+
+        <div class="relative mx-auto max-w-md px-4 py-10 text-center sm:px-6">
+            <h2 class="mb-1 font-heading text-lg font-bold text-white sm:text-xl">Stay in the loop</h2>
+            <p class="mb-4 text-sm text-brand-200">Get updates on campaigns and the impact your support makes.</p>
+
+            @if (session('status'))
+                <p class="mb-3 text-sm text-accent-300">{{ session('status') }}</p>
+            @endif
+            <form method="POST" action="{{ route('newsletter.subscribe') }}" class="flex gap-2">
+                @csrf
+                <label for="footer-newsletter-email" class="sr-only">Email address</label>
+                <input type="email" id="footer-newsletter-email" name="email" required placeholder="you@example.com" class="min-h-touch flex-1 rounded-sm border-0 px-3 py-2 text-base text-content placeholder:text-content-placeholder" style="background: rgba(255,255,255,0.15); color: #fff;">
+                <button type="submit" class="inline-flex items-center rounded-sm px-4 py-2 text-sm font-bold transition-all duration-base" style="background: var(--accent-400); color: var(--brand-900);">Subscribe</button>
+            </form>
+            @error('email') <p class="mt-2 text-xs" style="color: #fca5a5;">{{ $message }}</p> @enderror
+        </div>
+    </section>
+
     <div class="mx-auto grid max-w-container grid-cols-1 gap-8 px-4 py-12 sm:px-6 lg:grid-cols-4">
         <div>
             <img src="{{ asset('images/branding/logo-horizontal.png') }}" alt="{{ $orgName }}" class="mb-3 h-8 w-auto">

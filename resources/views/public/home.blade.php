@@ -253,16 +253,26 @@
             </section>
         @endif
 
-        {{-- 7. MONTHLY DONATION PROMO — full-bleed solid brand band, centered text, single
-             pill CTA. Was a light bg-action/10 tint card; this is the "Your Time is as
-             Valuable as Your Money" pattern from the reference site's volunteer CTA,
-             adopted here since this section is the closest structural match on this page
-             (centered heading + subtext + single CTA, no other content competing). --}}
+        {{-- 7. MONTHLY DONATION PROMO — full-bleed band, centered text, single pill CTA, on a
+             dark-tinted background photo — the "Your Time is as Valuable as Your Money"
+             volunteer-CTA pattern from the reference site, adopted here since this section
+             is the closest structural match on this page (centered heading + subtext +
+             single CTA, no other content competing). --}}
         @if ($settings->get('homepage.monthly_heading') || $settings->get('homepage.monthly_body'))
-            <section class="relative mb-12 w-screen overflow-hidden rounded-lg bg-brand-500 px-6 py-12 text-center sm:py-16" style="margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw); border-radius: 0;">
-                <h2 class="mb-2 font-heading text-2xl font-bold text-white sm:text-3xl">{{ $settings->get('homepage.monthly_heading') }}</h2>
-                <p class="mx-auto mb-6 max-w-xl text-brand-100">{{ $settings->get('homepage.monthly_body') }}</p>
-                <x-button variant="accent" size="lg" :pill="true" :href="route('campaigns.monthly-giving')">Give Monthly</x-button>
+            <section class="relative mb-12 w-screen overflow-hidden px-6 py-12 text-center sm:py-16" style="margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw);">
+                <img
+                    src="{{ asset('images/hero-volunteer.png') }}"
+                    alt=""
+                    aria-hidden="true"
+                    loading="lazy"
+                    class="absolute inset-0 h-full w-full object-cover"
+                >
+                <div class="absolute inset-0 bg-brand-900/80"></div>
+                <div class="relative">
+                    <h2 class="mb-2 font-heading text-2xl font-bold text-white sm:text-3xl">{{ $settings->get('homepage.monthly_heading') }}</h2>
+                    <p class="mx-auto mb-6 max-w-xl text-brand-100">{{ $settings->get('homepage.monthly_body') }}</p>
+                    <x-button variant="accent" size="lg" :pill="true" :href="route('campaigns.monthly-giving')">Give Monthly</x-button>
+                </div>
             </section>
         @endif
 
@@ -318,98 +328,11 @@
             </section>
         @endif
 
-        {{-- 11. NEWSLETTER / CTA BANNER — full-width dark strip with background image,
-                 impact stats, donate CTA, and newsletter form.
-                 Breaks out of the container to go edge-to-edge. --}}
-    </div>{{-- close container so the banner can be full-width --}}
+    </div>{{-- close container --}}
 
-    <section class="mb-12 relative w-screen overflow-hidden" style="margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw);">
-        {{-- Background image --}}
-        <img
-            src="{{ asset('images/hero-community.png') }}"
-            alt=""
-            aria-hidden="true"
-            loading="lazy"
-            class="absolute inset-0 h-full w-full object-cover"
-        >
-        {{-- Dark overlay gradient --}}
-        <div class="absolute inset-0" style="background: linear-gradient(90deg, rgba(16,61,38,0.45) 0%, rgba(16,61,38,0.82) 30%, rgba(11,41,26,0.95) 55%, rgba(11,41,26,0.97) 100%);"></div>
-
-        {{-- Content row --}}
-        <div class="relative mx-auto flex max-w-container flex-col items-center gap-6 px-4 py-8 sm:px-6 lg:flex-row lg:gap-8">
-            {{-- Left: Heading + subtext --}}
-            <div class="shrink-0 text-center lg:text-left" style="max-width: 280px;">
-                <h2 class="mb-2 text-xl font-bold text-white sm:text-2xl" style="line-height: 1.2; text-transform: uppercase; letter-spacing: 0.01em;">
-                    Be the Reason Someone Smiles Today
-                </h2>
-                <p class="text-sm text-brand-200">
-                    Your small contribution can make a big difference in someone's life.
-                </p>
-            </div>
-
-            {{-- Center: Impact stats in a row --}}
-            @if ($impactStats->isNotEmpty())
-                <div class="flex flex-1 flex-wrap items-center justify-center gap-6 lg:gap-8">
-                    @foreach ($impactStats->take(4) as $stat)
-                        <div class="flex flex-col items-center gap-1 text-center" style="min-width: 80px;">
-                            <span class="mb-1 flex h-10 w-10 items-center justify-center rounded-full" style="background: rgba(255,255,255,0.1);">
-                                @if ($loop->index === 0)
-                                    <svg class="h-5 w-5 text-accent-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-                                    </svg>
-                                @elseif ($loop->index === 1)
-                                    <svg class="h-5 w-5 text-accent-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                                    </svg>
-                                @elseif ($loop->index === 2)
-                                    <svg class="h-5 w-5 text-accent-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15a2.25 2.25 0 012.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z" />
-                                    </svg>
-                                @else
-                                    <svg class="h-5 w-5 text-accent-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v1.5M3 21v-6m0 0l2.77-.693a9 9 0 016.208.682l.108.054a9 9 0 006.086.71l3.114-.732a48.524 48.524 0 01-.005-10.499l-3.11.732a9 9 0 01-6.085-.711l-.108-.054a9 9 0 00-6.208-.682L3 4.5M3 15V4.5" />
-                                    </svg>
-                                @endif
-                            </span>
-                            <p class="text-xl font-bold text-white" style="font-variant-numeric: tabular-nums;">{{ $stat->value }}{{ $stat->suffix }}</p>
-                            <p class="text-xs text-brand-200">{{ $stat->label }}</p>
-                        </div>
-                    @endforeach
-                </div>
-            @endif
-
-            {{-- Right: Donate CTA + tagline --}}
-            <div class="flex shrink-0 flex-col items-center gap-3 text-center">
-                <a href="{{ route('donate.show') }}" class="inline-flex items-center gap-2 rounded-sm px-6 py-2 text-sm font-bold transition-all duration-base" style="background: var(--accent-400); color: var(--brand-900); border: 2px solid var(--accent-400);" onmouseover="this.style.background='var(--accent-300)';this.style.borderColor='var(--accent-300)'" onmouseout="this.style.background='var(--accent-400)';this.style.borderColor='var(--accent-400)'">
-                    DONATE NOW
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                        <path d="M12.001 19.653l-1.34-1.22C5.4 13.86 2 10.77 2 6.98 2 4.24 4.24 2 6.98 2c1.55 0 3.04.72 4.02 1.85A5.34 5.34 0 0115.02 2C17.76 2 20 4.24 20 6.98c0 3.79-3.4 6.88-8.66 11.46l-1.33 1.21Z" />
-                    </svg>
-                </a>
-                <p class="text-xs italic text-accent-300" style="max-width: 150px;">Thank you for being a part of our journey!</p>
-                <svg class="h-6 w-6 text-accent-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <path d="M12.001 19.653l-1.34-1.22C5.4 13.86 2 10.77 2 6.98 2 4.24 4.24 2 6.98 2c1.55 0 3.04.72 4.02 1.85A5.34 5.34 0 0115.02 2C17.76 2 20 4.24 20 6.98c0 3.79-3.4 6.88-8.66 11.46l-1.33 1.21Z" />
-                </svg>
-            </div>
-        </div>
-
-        {{-- Newsletter form row below --}}
-        <div class="relative mx-auto max-w-container px-4 pb-6 sm:px-6">
-            @if (session('status'))
-                <p class="mb-3 text-center text-sm text-accent-300">{{ session('status') }}</p>
-            @endif
-            <form method="POST" action="{{ route('newsletter.subscribe') }}" class="mx-auto flex max-w-md gap-2">
-                @csrf
-                <label for="newsletter-email" class="sr-only">Email address</label>
-                <input type="email" id="newsletter-email" name="email" required placeholder="you@example.com" class="min-h-touch flex-1 rounded-sm border-0 px-3 py-2 text-base text-content placeholder:text-content-placeholder" style="background: rgba(255,255,255,0.15); color: #fff;">
-                <button type="submit" class="inline-flex items-center rounded-sm px-4 py-2 text-sm font-bold transition-all duration-base" style="background: var(--accent-400); color: var(--brand-900);">Subscribe</button>
-            </form>
-            @error('email') <p class="mt-2 text-center text-xs" style="color: #fca5a5;">{{ $message }}</p> @enderror
-        </div>
-    </section>
-
-    {{-- Reopen a dummy wrapper so the closing </div> at the bottom still pairs --}}
-    <div>
+    {{-- The newsletter signup that used to live in a full-width banner here now lives in
+         the site footer (components/layout/public-footer.blade.php) so it appears on every
+         page, not just the homepage. --}}
 
     <script type="application/ld+json">
         {!! json_encode([
