@@ -1,7 +1,7 @@
 {
-  "_fonts-B7QiYTqE.css": {
-    "file": "assets/fonts-B7QiYTqE.css",
-    "src": "_fonts-B7QiYTqE.css"
+  "_fonts-D_KKaiaD.css": {
+    "file": "assets/fonts-D_KKaiaD.css",
+    "src": "_fonts-D_KKaiaD.css"
   },
   "_inter-400-normal-C38fXH4l.woff2": {
     "file": "assets/inter-400-normal-C38fXH4l.woff2",
@@ -35,6 +35,14 @@
     "file": "assets/inter-700-normal-Yt3aPRUw.woff2",
     "src": "_inter-700-normal-Yt3aPRUw.woff2"
   },
+  "_montserrat-700-normal-BWkrl476.woff": {
+    "file": "assets/montserrat-700-normal-BWkrl476.woff",
+    "src": "_montserrat-700-normal-BWkrl476.woff"
+  },
+  "_montserrat-700-normal-BdjcYUrC.woff2": {
+    "file": "assets/montserrat-700-normal-BdjcYUrC.woff2",
+    "src": "_montserrat-700-normal-BdjcYUrC.woff2"
+  },
   "_noto-sans-devanagari-400-normal-Bl6wi1XD.woff": {
     "file": "assets/noto-sans-devanagari-400-normal-Bl6wi1XD.woff",
     "src": "_noto-sans-devanagari-400-normal-Bl6wi1XD.woff"
@@ -60,7 +68,7 @@
     "src": "_noto-sans-devanagari-600-normal-D_YUQxD_.woff"
   },
   "resources/css/app.css": {
-    "file": "assets/app-BEkzF9_O.css",
+    "file": "assets/app-t6z-eOQg.css",
     "name": "app",
     "names": [
       "app.css"

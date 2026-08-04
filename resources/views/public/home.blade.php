@@ -37,8 +37,8 @@
         {{-- Full Width Background Image --}}
         <div class="absolute inset-0 z-0 pointer-events-none">
             <img
-                src="{{ asset('images/hero-volunteer.png') }}"
-                alt="Volunteer helping elderly woman"
+                src="{{ $firstBanner ? \Illuminate\Support\Facades\Storage::disk('public')->url($firstBanner->image_path) : asset('images/hero-volunteer.png') }}"
+                alt="{{ $firstBanner->title ?? 'Volunteer helping elderly woman' }}"
                 class="absolute inset-0 h-full w-full object-cover object-right"
             />
             {{-- Light warm overlay on left so text is crisp while the natural golden bokeh photo shows through --}}
@@ -46,45 +46,80 @@
         </div>
 
         <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-20 flex flex-col lg:flex-row items-center justify-between gap-10 min-h-[500px]">
-            
+
             {{-- Left Column: Typography & CTAs --}}
             <div class="w-full lg:w-7/12 flex flex-col items-start">
-                
+
                 {{-- Subheading --}}
                 <span class="text-base sm:text-lg font-bold text-brand-800 tracking-wide mb-2">
                     We are Social Activists
                 </span>
 
-                {{-- Main Title --}}
-                <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black text-gray-900 uppercase leading-[1.1] tracking-tight mb-4">
-                    TOGETHER, <br/>
-                    WE CAN BRING <br/>
-                    <span class="text-brand-800">CHANGE</span>
-                </h1>
+                @if ($firstBanner)
+                    {{-- Main Title --}}
+                    <h1 class="font-heading text-3xl sm:text-5xl lg:text-6xl font-black text-gray-900 uppercase leading-[1.1] tracking-tight mb-4">
+                        {{ $firstBanner->title }}
+                    </h1>
 
-                {{-- Divider with Heart --}}
-                <div class="flex items-center gap-3 w-40 mb-6">
-                    <div class="h-[2px] flex-1 bg-brand-800/30"></div>
-                    <svg class="h-4 w-4 text-brand-800" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M12.001 19.653l-1.34-1.22C5.4 13.86 2 10.77 2 6.98 2 4.24 4.24 2 6.98 2c1.55 0 3.04.72 4.02 1.85A5.34 5.34 0 0115.02 2C17.76 2 20 4.24 20 6.98c0 3.79-3.4 6.88-8.66 11.46l-1.33 1.21Z"/>
-                    </svg>
-                    <div class="h-[2px] flex-1 bg-brand-800/30"></div>
-                </div>
-
-                {{-- Paragraph --}}
-                <p class="text-base sm:text-lg text-gray-700 max-w-lg mb-8 leading-relaxed">
-                    We work for the well-being of humanity by helping the underprivileged and spreading hope, love and care.
-                </p>
-
-                {{-- Action Button --}}
-                <div class="flex items-center">
-                    <a href="{{ route('donate.show') }}" class="inline-flex items-center gap-3 rounded-full bg-[#163d26] px-10 sm:px-12 py-3.5 sm:py-4 text-xs sm:text-sm font-extrabold text-white uppercase tracking-wider whitespace-nowrap shadow-md hover:bg-[#0f2e1c] transition-all duration-200">
-                        JOIN US IN MAKING A DIFFERENCE
-                        <svg class="h-4 w-4 text-white shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                    {{-- Divider with Heart --}}
+                    <div class="flex items-center gap-3 w-40 mb-6">
+                        <div class="h-[2px] flex-1 bg-brand-800/30"></div>
+                        <svg class="h-4 w-4 text-brand-800" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M12.001 19.653l-1.34-1.22C5.4 13.86 2 10.77 2 6.98 2 4.24 4.24 2 6.98 2c1.55 0 3.04.72 4.02 1.85A5.34 5.34 0 0115.02 2C17.76 2 20 4.24 20 6.98c0 3.79-3.4 6.88-8.66 11.46l-1.33 1.21Z"/>
                         </svg>
-                    </a>
-                </div>
+                        <div class="h-[2px] flex-1 bg-brand-800/30"></div>
+                    </div>
+
+                    @if ($firstBanner->subtitle)
+                        {{-- Paragraph --}}
+                        <p class="text-base sm:text-lg text-gray-700 max-w-lg mb-8 leading-relaxed">
+                            {{ $firstBanner->subtitle }}
+                        </p>
+                    @endif
+
+                    @if ($firstBanner->cta_label)
+                        {{-- Action Button --}}
+                        <div class="flex items-center">
+                            <x-button :href="$firstBanner->url() ?? route('donate.show')" variant="accent" size="xl" :pill="true" class="uppercase tracking-wider">
+                                {{ $firstBanner->cta_label }}
+                                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                                </svg>
+                            </x-button>
+                        </div>
+                    @endif
+                @else
+                    {{-- Main Title --}}
+                    <h1 class="font-heading text-3xl sm:text-5xl lg:text-6xl font-black text-gray-900 uppercase leading-[1.1] tracking-tight mb-4">
+                        TOGETHER, <br/>
+                        WE CAN BRING <br/>
+                        <span class="text-brand-800">CHANGE</span>
+                    </h1>
+
+                    {{-- Divider with Heart --}}
+                    <div class="flex items-center gap-3 w-40 mb-6">
+                        <div class="h-[2px] flex-1 bg-brand-800/30"></div>
+                        <svg class="h-4 w-4 text-brand-800" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M12.001 19.653l-1.34-1.22C5.4 13.86 2 10.77 2 6.98 2 4.24 4.24 2 6.98 2c1.55 0 3.04.72 4.02 1.85A5.34 5.34 0 0115.02 2C17.76 2 20 4.24 20 6.98c0 3.79-3.4 6.88-8.66 11.46l-1.33 1.21Z"/>
+                        </svg>
+                        <div class="h-[2px] flex-1 bg-brand-800/30"></div>
+                    </div>
+
+                    {{-- Paragraph --}}
+                    <p class="text-base sm:text-lg text-gray-700 max-w-lg mb-8 leading-relaxed">
+                        We work for the well-being of humanity by helping the underprivileged and spreading hope, love and care.
+                    </p>
+
+                    {{-- Action Button --}}
+                    <div class="flex items-center">
+                        <x-button :href="route('donate.show')" variant="accent" size="xl" :pill="true" class="uppercase tracking-wider">
+                            Join Us in Making a Difference
+                            <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                            </svg>
+                        </x-button>
+                    </div>
+                @endif
             </div>
 
             {{-- Right Column: Floating Badge over image --}}
@@ -114,35 +149,43 @@
             </section>
         @endif
 
-        {{-- 3. IMPACT STATS — a banded promo banner, not a bare stat grid. `bg-brand-800` is a
-             deliberate one-off reach into the primitive ramp rather than a semantic token:
-             the palette has no "dark inverse surface" role, and defining one for a single
-             page-level banner would be over-engineering. Stat tiles stay width-locked
+        {{-- 3. IMPACT STATS — light bordered/shadowed cards on the page background, not a
+             dark banded promo. Matches the hover-lift pattern already used for the "Browse
+             by Cause" tiles just below (§4) for visual consistency within this codebase,
+             rather than inventing a new hover treatment. Stat tiles stay width-locked
              (`min-w-[7rem]`) to avoid CLS if a count-up animation is ever added on top. --}}
         @if ($impactStats->isNotEmpty())
-            <section class="mb-12 overflow-hidden rounded-lg bg-brand-800 p-8 sm:p-12">
-                <div class="grid items-center gap-8 lg:grid-cols-[1fr_auto]">
-                    <div class="text-center lg:text-left">
-                        <p class="mb-2 text-sm font-semibold uppercase tracking-wide text-brand-200">Together we can</p>
-                        <h2 class="mb-2 text-2xl font-bold text-white sm:text-3xl">Every contribution creates change</h2>
-                        <p class="mb-6 text-brand-100">Your support turns directly into food, medicine, school fees and shelter — with a receipt to prove it.</p>
-                        <x-button variant="accent" size="lg" :href="route('donate.show')" class="mx-auto lg:mx-0">
-                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                <path d="M12.001 19.653l-1.34-1.22C5.4 13.86 2 10.77 2 6.98 2 4.24 4.24 2 6.98 2c1.55 0 3.04.72 4.02 1.85A5.34 5.34 0 0115.02 2C17.76 2 20 4.24 20 6.98c0 3.79-3.4 6.88-8.66 11.46l-1.33 1.21Z" />
-                            </svg>
-                            Donate Now
-                        </x-button>
-                    </div>
+            <section class="mb-12 text-center">
+                <p class="mb-2 text-sm font-semibold uppercase tracking-wide text-brand-600">Together we can</p>
+                <h2 class="mb-2 font-heading text-2xl font-bold text-content sm:text-3xl">Every contribution creates change</h2>
+                <p class="mx-auto mb-8 max-w-xl text-content-muted">Your support turns directly into food, medicine, school fees and shelter — with a receipt to prove it.</p>
 
-                    <div class="grid grid-cols-2 gap-4">
-                        @foreach ($impactStats as $stat)
-                            <div class="min-w-[7rem] rounded-lg bg-white/10 p-4 text-center">
-                                <p class="tabular text-2xl font-bold text-white">{{ $stat->value }}{{ $stat->suffix }}</p>
-                                <p class="text-xs text-brand-100">{{ $stat->label }}</p>
-                            </div>
-                        @endforeach
-                    </div>
+                {{-- Tailwind's scanner only detects LITERAL class strings in source, so the
+                     column count must be one of a fixed set it can actually see — not an
+                     interpolated `sm:grid-cols-{{ $n }}`, which would never get generated. --}}
+                @php
+                    $statColsClass = match (min(4, max(1, $impactStats->count()))) {
+                        1 => 'sm:grid-cols-1',
+                        2 => 'sm:grid-cols-2',
+                        3 => 'sm:grid-cols-3',
+                        default => 'sm:grid-cols-4',
+                    };
+                @endphp
+                <div class="mb-8 grid grid-cols-2 gap-4 {{ $statColsClass }}">
+                    @foreach ($impactStats as $stat)
+                        <div class="min-w-[7rem] rounded-lg border border-line-divider bg-surface p-4 text-center shadow-sm transition-shadow duration-base hover:-translate-y-px hover:shadow-md sm:p-6">
+                            <p class="tabular font-heading text-2xl font-bold text-brand-700 sm:text-3xl">{{ $stat->value }}{{ $stat->suffix }}</p>
+                            <p class="text-xs uppercase tracking-wide text-content-muted">{{ $stat->label }}</p>
+                        </div>
+                    @endforeach
                 </div>
+
+                <x-button variant="accent" size="lg" :pill="true" :href="route('donate.show')">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M12.001 19.653l-1.34-1.22C5.4 13.86 2 10.77 2 6.98 2 4.24 4.24 2 6.98 2c1.55 0 3.04.72 4.02 1.85A5.34 5.34 0 0115.02 2C17.76 2 20 4.24 20 6.98c0 3.79-3.4 6.88-8.66 11.46l-1.33 1.21Z" />
+                    </svg>
+                    Donate Now
+                </x-button>
             </section>
         @endif
 
@@ -210,12 +253,16 @@
             </section>
         @endif
 
-        {{-- 7. MONTHLY DONATION PROMO --}}
+        {{-- 7. MONTHLY DONATION PROMO — full-bleed solid brand band, centered text, single
+             pill CTA. Was a light bg-action/10 tint card; this is the "Your Time is as
+             Valuable as Your Money" pattern from the reference site's volunteer CTA,
+             adopted here since this section is the closest structural match on this page
+             (centered heading + subtext + single CTA, no other content competing). --}}
         @if ($settings->get('homepage.monthly_heading') || $settings->get('homepage.monthly_body'))
-            <section class="mb-12 rounded-lg bg-action/10 p-6 text-center">
-                <h2 class="mb-2 text-2xl font-bold text-content">{{ $settings->get('homepage.monthly_heading') }}</h2>
-                <p class="mb-4 text-content-muted">{{ $settings->get('homepage.monthly_body') }}</p>
-                <x-button size="lg" :href="route('campaigns.monthly-giving')">Give Monthly</x-button>
+            <section class="relative mb-12 w-screen overflow-hidden rounded-lg bg-brand-500 px-6 py-12 text-center sm:py-16" style="margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw); border-radius: 0;">
+                <h2 class="mb-2 font-heading text-2xl font-bold text-white sm:text-3xl">{{ $settings->get('homepage.monthly_heading') }}</h2>
+                <p class="mx-auto mb-6 max-w-xl text-brand-100">{{ $settings->get('homepage.monthly_body') }}</p>
+                <x-button variant="accent" size="lg" :pill="true" :href="route('campaigns.monthly-giving')">Give Monthly</x-button>
             </section>
         @endif
 

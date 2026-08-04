@@ -129,6 +129,7 @@ export default {
         fontFamily: {
             sans: 'var(--font-sans)',
             deva: 'var(--font-deva)',
+            heading: 'var(--font-heading)',
         },
         fontSize: {
             xs:   ['var(--text-xs)',   { lineHeight: 'var(--leading-xs)' }],

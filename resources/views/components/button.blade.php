@@ -14,6 +14,10 @@
     focus ring: tokens.css §8 draws that ring from a `:where(...)` rule, and `:where()`
     contributes zero specificity, so any utility beats it. Buttons had no focus indicator.
 
+    `pill` swaps the default rounded-md corners for rounded-full, same opt-in pattern as
+    `full`. Added for the homepage/campaign-card redesign's pill-shaped CTAs — the default
+    stays rounded-md so this is additive, not a visual change to any existing call site.
+
     SIZE / TOUCH TARGET — one deliberate deviation from §10.1, flagged rather than silent:
     the spec lists `base` as 40px while also requiring a 44×44 minimum touch target. 40px
     cannot satisfy that, so `base` is 44px here. `sm` (32px) stays admin-only and must never
@@ -23,11 +27,12 @@
     'variant' => 'primary',
     'size' => 'base',
     'full' => false,
+    'pill' => false,
     'href' => null,
 ])
 
 @php
-    $base = 'inline-flex items-center justify-center gap-2 rounded-md font-semibold '
+    $base = 'inline-flex items-center justify-center gap-2 font-semibold '
         .'transition-colors duration-fast disabled:cursor-not-allowed disabled:opacity-60';
 
     $sizes = [
@@ -48,7 +53,7 @@
         'danger' => 'bg-danger text-action-on hover:bg-danger-text',
     ];
 
-    $classes = trim($base.' '.($sizes[$size] ?? $sizes['base']).' '.($variants[$variant] ?? $variants['primary'])
+    $classes = trim($base.' '.($pill ? 'rounded-full' : 'rounded-md').' '.($sizes[$size] ?? $sizes['base']).' '.($variants[$variant] ?? $variants['primary'])
         .($full ? ' w-full' : ''));
 @endphp
 

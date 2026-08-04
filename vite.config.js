@@ -16,6 +16,7 @@ export default defineConfig({
             fonts: [
                 bunny('Inter', { weights: [400, 500, 600, 700] }),
                 bunny('Noto Sans Devanagari', { weights: [400, 500, 600] }),
+                bunny('Montserrat', { weights: [700] }),
             ],
         }),
         tailwindcss(),
