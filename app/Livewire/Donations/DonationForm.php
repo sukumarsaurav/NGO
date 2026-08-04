@@ -37,6 +37,13 @@ class DonationForm extends Component
 {
     public ?int $campaignId = null;
 
+    /**
+     * Purely presentational — which half of the form is currently shown.
+     * `donate()` never checks this; it re-validates everything itself
+     * regardless of what step the UI thinks it's on.
+     */
+    public int $step = 1;
+
     public string $amount = '1000';
 
     public ?int $selectedPreset = null;
@@ -179,6 +186,17 @@ class DonationForm extends Component
     public function updatedAmount(): void
     {
         $this->selectedPreset = null;
+    }
+
+    public function nextStep(): void
+    {
+        $this->validateOnly('amount');
+        $this->step = 2;
+    }
+
+    public function previousStep(): void
+    {
+        $this->step = 1;
     }
 
     public function conflictsWith80gAndAnonymous(): bool
