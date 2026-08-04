@@ -30,20 +30,20 @@
         >
         <div class="absolute inset-0 bg-brand-900/80"></div>
 
-        <div class="relative mx-auto max-w-md px-4 py-10 text-center sm:px-6">
-            <h2 class="mb-1 font-heading text-lg font-bold text-white sm:text-xl">Stay in the loop</h2>
-            <p class="mb-4 text-sm text-brand-200">Get updates on campaigns and the impact your support makes.</p>
+        <div class="relative mx-auto max-w-md px-6 py-14 text-center sm:px-8 sm:py-16">
+            <h2 class="mb-2 font-heading text-xl font-bold text-white sm:text-2xl">Stay in the loop</h2>
+            <p class="mb-6 text-sm text-brand-200">Get updates on campaigns and the impact your support makes.</p>
 
             @if (session('status'))
                 <p class="mb-3 text-sm text-accent-300">{{ session('status') }}</p>
             @endif
-            <form method="POST" action="{{ route('newsletter.subscribe') }}" class="flex gap-2">
+            <form method="POST" action="{{ route('newsletter.subscribe') }}" class="flex flex-col gap-3 sm:flex-row">
                 @csrf
                 <label for="footer-newsletter-email" class="sr-only">Email address</label>
-                <input type="email" id="footer-newsletter-email" name="email" required placeholder="you@example.com" class="min-h-touch flex-1 rounded-sm border-0 px-3 py-2 text-base text-content placeholder:text-content-placeholder" style="background: rgba(255,255,255,0.15); color: #fff;">
-                <button type="submit" class="inline-flex items-center rounded-sm px-4 py-2 text-sm font-bold transition-all duration-base" style="background: var(--accent-400); color: var(--brand-900);">Subscribe</button>
+                <input type="email" id="footer-newsletter-email" name="email" required placeholder="you@example.com" class="min-h-touch flex-1 rounded-sm border-0 px-4 py-3 text-base text-white placeholder-white/60" style="background: rgba(255,255,255,0.15);">
+                <button type="submit" class="inline-flex min-h-touch items-center justify-center rounded-sm px-6 py-3 text-sm font-bold transition-all duration-base" style="background: var(--accent-400); color: var(--brand-900);">Subscribe</button>
             </form>
-            @error('email') <p class="mt-2 text-xs" style="color: #fca5a5;">{{ $message }}</p> @enderror
+            @error('email') <p class="mt-3 text-xs" style="color: #fca5a5;">{{ $message }}</p> @enderror
         </div>
     </section>
 
