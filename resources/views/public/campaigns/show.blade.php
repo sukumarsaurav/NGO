@@ -40,21 +40,30 @@
              the right-hand column spanning both rows. --}}
         <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
             <div class="lg:col-span-2 lg:col-start-1 lg:row-start-1">
-                <h1 class="mb-1 text-2xl font-bold text-content sm:text-3xl">{{ $campaign->title }}</h1>
+                <div class="relative mb-4 aspect-video overflow-hidden rounded-lg bg-surface-muted">
+                    @if ($coverUrl)
+                        <img src="{{ $coverUrl }}" alt="{{ $campaign->cover_image_alt ?: $campaign->title }}" class="h-full w-full object-cover">
+                    @else
+                        <div class="flex h-full w-full items-center justify-center text-content-muted">{{ $campaign->category->name }}</div>
+                    @endif
+
+                    <div class="absolute inset-x-3 top-3 flex items-start gap-2">
+                        @if ($campaign->is_urgent)
+                            <x-badge variant="urgent" class="shadow-sm">Urgent</x-badge>
+                        @endif
+                        @if ($campaign->category)
+                            <x-badge variant="info" class="shadow-sm">{{ $campaign->category->name }}</x-badge>
+                        @endif
+                    </div>
+                </div>
+
+                <h1 class="mb-1 font-heading text-2xl font-bold text-content sm:text-3xl">{{ $campaign->title }}</h1>
                 @if ($campaign->subtitle)
                     <p class="mb-1 text-content-muted">{{ $campaign->subtitle }}</p>
                 @endif
                 @if ($campaign->beneficiary_name)
                     <p class="mb-4 text-sm text-content-muted">by {{ $campaign->beneficiary_name }}</p>
                 @endif
-
-                <div class="aspect-video overflow-hidden rounded-lg bg-surface-muted">
-                    @if ($coverUrl)
-                        <img src="{{ $coverUrl }}" alt="{{ $campaign->cover_image_alt ?: $campaign->title }}" class="h-full w-full object-cover">
-                    @else
-                        <div class="flex h-full w-full items-center justify-center text-content-muted">{{ $campaign->category->name }}</div>
-                    @endif
-                </div>
             </div>
 
             <div class="lg:col-start-3 lg:row-start-1 lg:row-span-2">
@@ -88,7 +97,7 @@
                 --}}
                 @if ($campaign->products->isNotEmpty())
                     <section id="products" class="scroll-mt-[6.5rem] mb-12">
-                        <h2 class="mb-4 text-xl font-bold text-content">Products</h2>
+                        <h2 class="mb-4 font-heading text-xl font-bold text-content">Products</h2>
                         @livewire('campaigns.product-catalogue', ['campaignId' => $campaign->id])
                     </section>
                 @endif
@@ -116,7 +125,7 @@
                 @endif
 
                 <section id="story" class="scroll-mt-[6.5rem] prose prose-sm mb-12 max-w-none text-content">
-                    <h2 class="mb-3 text-xl font-bold text-content">Story</h2>
+                    <h2 class="mb-3 font-heading text-xl font-bold text-content">Story</h2>
                     {{-- The story is edited via Filament's RichEditor and stores
                          real HTML — rendered raw here, not escaped, or every
                          paragraph and bold word would show as literal markup.
@@ -126,7 +135,7 @@
                 </section>
 
                 <section id="updates" class="scroll-mt-[6.5rem] mb-12">
-                    <h2 class="mb-4 text-xl font-bold text-content">Updates</h2>
+                    <h2 class="mb-4 font-heading text-xl font-bold text-content">Updates</h2>
                     @forelse ($campaign->updates as $update)
                         <article class="mb-4 border-l-2 border-action pl-4">
                             <p class="text-xs text-content-muted">{{ $update->published_at->format('d M Y') }}</p>
@@ -139,7 +148,7 @@
                 </section>
 
                 <section id="donors" class="scroll-mt-[6.5rem] mb-12" x-data="{ tab: 'recent' }">
-                    <h2 class="mb-4 text-xl font-bold text-content">Donors ({{ $campaign->donor_count }})</h2>
+                    <h2 class="mb-4 font-heading text-xl font-bold text-content">Donors ({{ $campaign->donor_count }})</h2>
                     <div class="mb-3 flex gap-2 text-sm">
                         <button type="button" @click="tab = 'recent'" :class="tab === 'recent' ? 'bg-action text-action-on' : 'bg-surface text-content'" class="rounded-full px-3 py-1 font-medium">Recent</button>
                         <button type="button" @click="tab = 'generous'" :class="tab === 'generous' ? 'bg-action text-action-on' : 'bg-surface text-content'" class="rounded-full px-3 py-1 font-medium">Most Generous</button>
@@ -169,7 +178,7 @@
 
                 @if ($faqs->isNotEmpty())
                     <section id="faq" class="scroll-mt-[6.5rem] mb-12" x-data="{ open: null }">
-                        <h2 class="mb-4 text-xl font-bold text-content">Frequently asked questions</h2>
+                        <h2 class="mb-4 font-heading text-xl font-bold text-content">Frequently asked questions</h2>
                         <div class="divide-y divide-line-divider rounded-lg border border-line-divider">
                             @foreach ($faqs as $index => $faq)
                                 <div>
@@ -192,7 +201,7 @@
 
                 @if ($relatedCampaigns->isNotEmpty())
                     <section class="mb-12">
-                        <h2 class="mb-4 text-xl font-bold text-content">Related campaigns</h2>
+                        <h2 class="mb-4 font-heading text-xl font-bold text-content">Related campaigns</h2>
                         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                             @foreach ($relatedCampaigns as $related)
                                 <x-campaigns.card :campaign="$related" />
