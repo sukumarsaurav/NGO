@@ -35,6 +35,40 @@
             'active' => request()->routeIs('blog.*'),
         ],
     ];
+
+    // A second, smaller array rather than five more entries in $navItems above —
+    // five more flat top-level links would overflow the desktop bar. Rendered as
+    // a "More" dropdown on desktop and as extra rows (after a small label) in the
+    // mobile drawer, from this one source, for the same reason $navItems is
+    // declared once: a nav change made in only one place silently drifts.
+    $moreNavItems = [
+        [
+            'label' => 'Gallery',
+            'href' => route('gallery.index'),
+            'active' => request()->routeIs('gallery.index'),
+        ],
+        [
+            'label' => 'Partners',
+            'href' => route('partners.index'),
+            'active' => request()->routeIs('partners.index'),
+        ],
+        [
+            'label' => 'Certificates',
+            'href' => route('certificates.index'),
+            'active' => request()->routeIs('certificates.index'),
+        ],
+        [
+            'label' => 'CSR Partnership',
+            'href' => route('csr-partnership.show'),
+            'active' => request()->routeIs('csr-partnership.*'),
+        ],
+        [
+            'label' => 'Internship',
+            'href' => route('internship.show'),
+            'active' => request()->routeIs('internship.*'),
+        ],
+    ];
+    $moreNavActive = collect($moreNavItems)->contains('active', true);
 @endphp
 
 <!DOCTYPE html>
@@ -145,6 +179,49 @@
                             ></span>
                         </a>
                     @endforeach
+
+                    {{-- "More" dropdown — same x-show/x-transition idiom as the mobile drawer
+                         below, just a smaller/inline instance of it. `@click.outside` closes it
+                         without needing a full-screen scrim like the drawer has. --}}
+                    <div class="relative" x-data="{ moreOpen: false }" @click.outside="moreOpen = false" @keydown.escape="moreOpen = false">
+                        <button
+                            type="button"
+                            @click="moreOpen = ! moreOpen"
+                            class="group relative flex items-center gap-1 py-2 transition-colors duration-fast {{ $moreNavActive ? 'text-link' : 'text-content hover:text-link' }}"
+                            :aria-expanded="moreOpen ? 'true' : 'false'"
+                            aria-haspopup="true"
+                        >
+                            More
+                            <svg class="h-4 w-4 transition-transform duration-fast" :class="moreOpen ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                            <span
+                                aria-hidden="true"
+                                class="absolute inset-x-0 bottom-0 h-[2px] origin-left rounded-full bg-action transition-transform duration-fast ease-out {{ $moreNavActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100' }}"
+                            ></span>
+                        </button>
+
+                        <div
+                            x-show="moreOpen"
+                            x-cloak
+                            x-transition:enter="transition duration-fast ease-out"
+                            x-transition:enter-start="opacity-0 -translate-y-1"
+                            x-transition:leave="transition duration-fast ease-in-out"
+                            x-transition:leave-end="opacity-0"
+                            class="absolute right-0 top-full z-header mt-2 w-56 rounded-md border border-line-divider bg-surface p-2 shadow-lg"
+                        >
+                            @foreach ($moreNavItems as $item)
+                                <a
+                                    href="{{ $item['href'] }}"
+                                    @click="moreOpen = false"
+                                    @if ($item['active']) aria-current="page" @endif
+                                    class="flex min-h-touch items-center rounded-md px-3 py-2 text-sm transition-colors duration-fast {{ $item['active'] ? 'bg-trust text-trust-text' : 'text-content hover:bg-surface-muted' }}"
+                                >
+                                    {{ $item['label'] }}
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
                 </nav>
 
                 <div class="flex items-center gap-3">
@@ -230,6 +307,18 @@
                         {{ $item['label'] }}
                     </a>
                 @endforeach
+
+                <p class="mb-1 mt-4 px-3 text-xs font-semibold uppercase tracking-wide text-content-muted">More</p>
+                @foreach ($moreNavItems as $item)
+                    <a
+                        href="{{ $item['href'] }}"
+                        @if ($item['active']) aria-current="page" @endif
+                        class="flex min-h-touch items-center rounded-md px-3 py-3 transition-colors duration-fast {{ $item['active'] ? 'bg-trust text-trust-text' : 'text-content hover:bg-surface-muted' }}"
+                    >
+                        {{ $item['label'] }}
+                    </a>
+                @endforeach
+
                 @guest
                     <a href="{{ route('login') }}" class="flex min-h-touch items-center rounded-md px-3 py-3 text-content transition-colors duration-fast hover:bg-surface-muted">Login</a>
                 @endguest

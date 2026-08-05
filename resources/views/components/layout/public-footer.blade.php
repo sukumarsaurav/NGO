@@ -79,6 +79,11 @@
                 <li><a href="{{ route('pages.show', 'about') }}" class="hover:text-link">About</a></li>
                 <li><a href="{{ route('blog.index') }}" class="hover:text-link">Blog</a></li>
                 <li><a href="{{ route('contact.show') }}" class="hover:text-link">Contact</a></li>
+                <li><a href="{{ route('gallery.index') }}" class="hover:text-link">Gallery</a></li>
+                <li><a href="{{ route('partners.index') }}" class="hover:text-link">Partners</a></li>
+                <li><a href="{{ route('certificates.index') }}" class="hover:text-link">Certificates</a></li>
+                <li><a href="{{ route('csr-partnership.show') }}" class="hover:text-link">CSR Partnership</a></li>
+                <li><a href="{{ route('internship.show') }}" class="hover:text-link">Internship</a></li>
                 <li><a href="{{ route('pages.show', 'privacy-policy') }}" class="hover:text-link">Privacy Policy</a></li>
                 <li><a href="{{ route('pages.show', 'terms-conditions') }}" class="hover:text-link">Terms &amp; Conditions</a></li>
             </ul>

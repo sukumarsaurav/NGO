@@ -163,6 +163,20 @@ class EmailTemplateSeeder extends Seeder
             'available_variables' => ['name', 'email', 'subject_line', 'message', 'org_name'],
         ],
         [
+            'key' => 'csr.new_inquiry',
+            'name' => 'New CSR partnership inquiry (admin)',
+            'subject' => 'New CSR partnership inquiry: {{ organisation_name }}',
+            'body_html' => "<p style=\"font-size: 14px; line-height: 1.6;\"><strong>{{ contact_name }}</strong> from <strong>{{ organisation_name }}</strong> ({{ email }}) is interested in a CSR partnership:</p>\n<p style=\"font-size: 14px; line-height: 1.6;\">{{ message }}</p>",
+            'available_variables' => ['organisation_name', 'contact_name', 'email', 'message', 'org_name'],
+        ],
+        [
+            'key' => 'internship.new_application',
+            'name' => 'New internship application (admin)',
+            'subject' => 'New internship application: {{ name }}',
+            'body_html' => '<p style="font-size: 14px; line-height: 1.6;"><strong>{{ name }}</strong> ({{ email }}) applied for an internship — track: {{ track }}. Review it in the admin panel.</p>',
+            'available_variables' => ['name', 'email', 'track', 'org_name'],
+        ],
+        [
             'key' => 'newsletter.confirm',
             'name' => 'Newsletter double opt-in',
             'subject' => 'Confirm your subscription to {{ org_name }}',

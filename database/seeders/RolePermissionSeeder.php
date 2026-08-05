@@ -52,6 +52,8 @@ class RolePermissionSeeder extends Seeder
         // Public site & CMS — M10, 07-SEO
         'manage_pages', 'manage_posts', 'manage_testimonials', 'manage_press_mentions',
         'manage_impact_stats', 'manage_banners', 'view_contact_messages', 'manage_redirects',
+        'manage_gallery_photos', 'manage_partners', 'manage_certificates',
+        'manage_csr_inquiries', 'manage_internship_applications',
 
         // Manager panel & permissions — M11
         'manage_users', 'manage_roles',
