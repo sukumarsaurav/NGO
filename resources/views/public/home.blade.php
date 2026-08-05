@@ -328,6 +328,113 @@
             </section>
         @endif
 
+        {{-- 11. FROM THE BLOG — one row, links out to the full listing rather than
+             trying to be it. Same card markup as blog/index.blade.php so the two never
+             drift into two different "blog card" designs. --}}
+        @if ($blogPosts->isNotEmpty())
+            <section class="mb-12">
+                <div class="mb-4 flex items-center justify-between">
+                    <h2 class="text-2xl font-bold text-content">From the Blog</h2>
+                    <a href="{{ route('blog.index') }}" class="text-sm font-medium text-link hover:text-link-hover">View all</a>
+                </div>
+                <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
+                    @foreach ($blogPosts as $post)
+                        <a href="{{ route('blog.show', $post->slug) }}" class="block overflow-hidden rounded-lg border border-line-divider bg-surface">
+                            <div class="aspect-video bg-surface-muted">
+                                @if ($post->cover_image_path)
+                                    <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($post->cover_image_path) }}" alt="{{ $post->title }}" loading="lazy" class="h-full w-full object-cover">
+                                @endif
+                            </div>
+                            <div class="p-4">
+                                @if ($post->category)
+                                    <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-action">{{ $post->category->label() }}</p>
+                                @endif
+                                <p class="mb-1 font-semibold text-content">{{ $post->title }}</p>
+                                @if ($post->excerpt)
+                                    <p class="line-clamp-2 text-sm text-content-muted">{{ $post->excerpt }}</p>
+                                @endif
+                            </div>
+                        </a>
+                    @endforeach
+                </div>
+            </section>
+        @endif
+
+        {{-- 12. GALLERY — one row of thumbnails, links out to /gallery. --}}
+        @if ($galleryPhotos->isNotEmpty())
+            <section class="mb-12">
+                <div class="mb-4 flex items-center justify-between">
+                    <h2 class="text-2xl font-bold text-content">Gallery</h2>
+                    <a href="{{ route('gallery.index') }}" class="text-sm font-medium text-link hover:text-link-hover">View all</a>
+                </div>
+                <div class="grid grid-cols-3 gap-4 sm:grid-cols-6">
+                    @foreach ($galleryPhotos as $photo)
+                        <a href="{{ route('gallery.index') }}" class="block aspect-square overflow-hidden rounded-lg border border-line-divider bg-surface-muted">
+                            <img
+                                src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($photo->image_path) }}"
+                                alt="{{ $photo->title ?: 'Gallery photo' }}"
+                                loading="lazy"
+                                class="h-full w-full object-cover transition-transform duration-base hover:scale-105"
+                            >
+                        </a>
+                    @endforeach
+                </div>
+            </section>
+        @endif
+
+        {{-- 13. PARTNERS — logo strip, same treatment as "Featured In" (§9) since both
+             are trust-signal logo rows, just a different source. --}}
+        @if ($partners->isNotEmpty())
+            <section class="mb-12">
+                <div class="mb-4 flex items-center justify-between">
+                    <h2 class="text-sm font-semibold uppercase tracking-wide text-content-muted">Our Partners</h2>
+                    <a href="{{ route('partners.index') }}" class="text-sm font-medium text-link hover:text-link-hover">View all</a>
+                </div>
+                <div class="flex flex-wrap items-center justify-center gap-8">
+                    @foreach ($partners as $partner)
+                        <a href="{{ route('partners.index') }}" aria-label="{{ $partner->name }}">
+                            <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($partner->logo_path) }}" alt="{{ $partner->name }}" loading="lazy" class="h-8 object-contain grayscale transition-all duration-base hover:grayscale-0">
+                        </a>
+                    @endforeach
+                </div>
+            </section>
+        @endif
+
+        {{-- 14. CERTIFICATES — compact trust list, links out to /certificates. --}}
+        @if ($certificates->isNotEmpty())
+            <section class="mb-12">
+                <div class="mb-4 flex items-center justify-between">
+                    <h2 class="text-2xl font-bold text-content">Certificates &amp; Registrations</h2>
+                    <a href="{{ route('certificates.index') }}" class="text-sm font-medium text-link hover:text-link-hover">View all</a>
+                </div>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    @foreach ($certificates as $certificate)
+                        <a href="{{ route('certificates.index') }}" class="flex items-center gap-3 rounded-lg border border-line-divider bg-surface p-4 transition-shadow duration-base hover:shadow-md">
+                            <svg class="h-6 w-6 shrink-0 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span class="text-sm font-semibold text-content">{{ $certificate->title }}</span>
+                        </a>
+                    @endforeach
+                </div>
+            </section>
+        @endif
+
+        {{-- 15. CSR PARTNERSHIP &amp; INTERNSHIP — always-on CTA cards (not data-driven
+             lists like the sections above), so no isNotEmpty() guard. --}}
+        <section class="mb-12 grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div class="rounded-lg border border-line-divider bg-surface p-6 text-center">
+                <h2 class="mb-2 font-heading text-xl font-bold text-content">CSR Partnership</h2>
+                <p class="mb-4 text-sm text-content-muted">Channel your organisation's CSR budget into measurable, verified impact.</p>
+                <x-button variant="accent" size="lg" :pill="true" :href="route('csr-partnership.show')">Partner With Us</x-button>
+            </div>
+            <div class="rounded-lg border border-line-divider bg-surface p-6 text-center">
+                <h2 class="mb-2 font-heading text-xl font-bold text-content">Internship Program</h2>
+                <p class="mb-4 text-sm text-content-muted">Gain real-world experience working on campaigns and community outreach.</p>
+                <x-button variant="accent" size="lg" :pill="true" :href="route('internship.show')">Apply Now</x-button>
+            </div>
+        </section>
+
     </div>{{-- close container --}}
 
     {{-- The newsletter signup that used to live in a full-width banner here now lives in

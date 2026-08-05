@@ -9,13 +9,17 @@ use App\Http\Controllers\Controller;
 use App\Models\Banner;
 use App\Models\Campaign;
 use App\Models\CampaignCategory;
+use App\Models\Certificate;
+use App\Models\GalleryPhoto;
 use App\Models\ImpactStat;
+use App\Models\Partner;
+use App\Models\Post;
 use App\Models\PressMention;
 use App\Models\Testimonial;
 use Illuminate\View\View;
 
 /**
- * The homepage — twelve sections, each naming its own storage. See
+ * The homepage — each section names its own storage. See
  * docs/modules/M10-public-site-cms.md's "Homepage sections".
  */
 class HomeController extends Controller
@@ -59,6 +63,19 @@ class HomeController extends Controller
                 ->get(),
             'pressMentions' => PressMention::query()->where('is_published', true)->orderBy('sort_order')->get(),
             'testimonials' => Testimonial::query()->where('is_published', true)->orderBy('sort_order')->get(),
+            // One row each — the landing page teases these sections and links to
+            // their own full page (/blog, /gallery, /partners, /certificates)
+            // rather than trying to be the full listing itself.
+            'blogPosts' => Post::query()
+                ->where('is_published', true)
+                ->whereNotNull('published_at')
+                ->where('published_at', '<=', now())
+                ->orderByDesc('published_at')
+                ->limit(3)
+                ->get(),
+            'galleryPhotos' => GalleryPhoto::query()->where('is_published', true)->orderBy('sort_order')->limit(6)->get(),
+            'partners' => Partner::query()->where('is_published', true)->orderBy('sort_order')->limit(8)->get(),
+            'certificates' => Certificate::query()->where('is_published', true)->orderBy('sort_order')->limit(4)->get(),
         ]);
     }
 }

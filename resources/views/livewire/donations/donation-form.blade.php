@@ -25,27 +25,36 @@
             {{-- A radiogroup, not a row of buttons: the presets are one choice with one answer,
                  which is what `role="radio"` + `aria-checked` conveys and a plain button row
                  does not. --}}
-            <p id="amount-presets-label" class="mb-3 block text-sm font-semibold text-content">Amount</p>
-            <div class="flex flex-wrap gap-2" role="radiogroup" aria-labelledby="amount-presets-label">
+            <p id="amount-presets-label" class="mb-3 block text-sm font-semibold text-content">Select Donation Amount</p>
+            <div class="grid grid-cols-2 gap-2 sm:grid-cols-4" role="radiogroup" aria-labelledby="amount-presets-label">
                 @foreach ($this->presets() as $presetPaise)
+                    @php
+                        $presetVal = (int) ($presetPaise / 100);
+                        $presetTag = match(true) {
+                            $presetVal <= 500 => '1 Week Food',
+                            $presetVal <= 1000 => 'Shelter & Kit',
+                            $presetVal <= 2500 => '1 Month Medical',
+                            default => 'Critical Care',
+                        };
+                        $isPopular = $presetVal === 1000;
+                    @endphp
                     <button
                         type="button"
                         role="radio"
                         aria-checked="{{ $selectedPreset === $presetPaise ? 'true' : 'false' }}"
                         wire:click="selectPreset({{ $presetPaise }})"
-                        class="min-h-touch rounded-md border px-4 py-2 text-base font-semibold transition-colors duration-fast {{ $selectedPreset === $presetPaise ? 'border-action bg-action/10 text-action' : 'border-line text-content hover:bg-surface-muted' }}"
+                        class="relative flex flex-col items-center justify-center rounded-lg border p-3 transition-all duration-fast text-center {{ $selectedPreset === $presetPaise ? 'border-brand-700 bg-brand-50/80 text-brand-900 ring-2 ring-brand-600/30' : 'border-line-divider bg-surface text-content hover:border-brand-300 hover:bg-surface-muted' }}"
                     >
-                        &#8377;{{ number_format($presetPaise / 100) }}
+                        @if ($isPopular)
+                            <span class="absolute -top-2.5 rounded-full bg-brand-800 px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-white shadow-xs">Popular</span>
+                        @endif
+                        <span class="font-heading text-lg font-bold">₹{{ number_format($presetVal) }}</span>
+                        <span class="text-[0.7rem] text-content-muted mt-0.5 line-clamp-1">{{ $presetTag }}</span>
                     </button>
                 @endforeach
             </div>
 
-            {{-- `.live.debounce` so the submit button's amount tracks what has been typed. With
-                 the deferred bind the button still read "Donate ₹1,000" after the donor had
-                 typed ₹5,000 — the most important number on the page stayed stale until some
-                 unrelated round trip refreshed it. Clearing the selected preset moved to an
-                 `updatedAmount()` hook on the component; the old `wire:click="$set(...)"` cost
-                 a round trip on every focus and never fired when the user actually typed. --}}
+            {{-- `.live.debounce` so the submit button's amount tracks what has been typed. --}}
             <x-form.field
                 class="mt-3"
                 name="amount"
@@ -55,6 +64,15 @@
                 inputmode="numeric"
                 wire:model.live.debounce.400ms="amount"
             />
+
+            @if ($amount && (float) $amount > 0)
+                <div class="mt-3 flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50/80 p-2.5 text-xs text-emerald-900">
+                    <svg class="h-4 w-4 shrink-0 text-emerald-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span><strong>80G Tax Savings:</strong> Save approx. <strong>₹{{ number_format((float)$amount * 0.5) }}</strong> in income tax (50% deduction under Sec 80G).</span>
+                </div>
+            @endif
         </div>
 
         <div class="mb-6">
