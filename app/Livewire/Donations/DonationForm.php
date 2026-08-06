@@ -117,6 +117,16 @@ class DonationForm extends Component
         $this->utmData = collect(request()->only(['utm_source', 'utm_medium', 'utm_campaign', 'utm_content']))
             ->filter()
             ->all();
+
+        // `$amount` defaults to '1000' and `$selectedPreset` defaults to null — without
+        // this, the form opened showing an amount with no chip selected, two controls
+        // disagreeing about the same value. See
+        // docs/11-UI-UX-AUDIT-HOME-CAMPAIGNS.md §1.1 and
+        // docs/12-REMEDIATION-PLAN-HOME-CAMPAIGNS.md PR 2.1 item 6.
+        $amountPaise = Money::fromRupees($this->amount)->toPaise();
+        if (in_array($amountPaise, $this->presets(), true)) {
+            $this->selectedPreset = $amountPaise;
+        }
     }
 
     /**

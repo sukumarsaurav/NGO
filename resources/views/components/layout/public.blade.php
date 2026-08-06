@@ -151,14 +151,22 @@
             <div class="header-shadow pointer-events-none absolute inset-0 shadow-md" aria-hidden="true"></div>
 
             <div class="relative mx-auto flex h-16 max-w-container items-center justify-between px-4 sm:px-6">
+                {{-- One `<picture>`, not two `<img>` toggled with `hidden`/`sm:hidden`.
+                     `display: none` does not stop a browser from fetching an `<img>` — both
+                     logos (345 KB combined) were downloading on every single page load
+                     regardless of viewport. `<picture>`'s `<source media>` is evaluated
+                     before any request is made, so only the one actually shown is fetched.
+                     See docs/11-UI-UX-AUDIT-HOME-CAMPAIGNS.md §3.1. --}}
                 <a href="{{ url('/') }}" class="flex items-center rounded-sm" aria-label="{{ $orgName }} — home">
-                    {{-- Horizontal logo has room to breathe once the nav links and Donate
-                         button no longer compete with it for width; the compact mark takes
-                         over below that so the header never crowds.
-                         Intrinsic width/height on both: the header is above the fold on
-                         every page, and an unsized logo reflows it as the image lands. --}}
-                    <img src="{{ asset('images/branding/logo-horizontal.png') }}" alt="{{ $orgName }}" width="180" height="32" class="hidden h-8 w-auto sm:block">
-                    <img src="{{ asset('images/branding/logo-mark.png') }}" alt="{{ $orgName }}" width="32" height="32" class="h-8 w-8 sm:hidden">
+                    {{-- No `width`/`height` attributes — the two sources have different
+                         intrinsic aspect ratios (32×32 mark, 180×32 horizontal), and a
+                         single `<img>` can only declare one pair. `aspect-square` /
+                         `sm:aspect-[180/32]` reserve the correct box per breakpoint instead,
+                         so there is still no reflow once the image lands. --}}
+                    <picture>
+                        <source media="(min-width: 640px)" srcset="{{ asset('images/branding/logo-horizontal.png') }}">
+                        <img src="{{ asset('images/branding/logo-mark.png') }}" alt="{{ $orgName }}" class="h-8 w-8 aspect-square sm:w-auto sm:aspect-[180/32]">
+                    </picture>
                 </a>
 
                 <nav class="hidden items-center gap-6 text-sm font-medium lg:flex" aria-label="Main">
@@ -208,7 +216,7 @@
                             x-transition:enter-start="opacity-0 -translate-y-1"
                             x-transition:leave="transition duration-fast ease-in-out"
                             x-transition:leave-end="opacity-0"
-                            class="absolute right-0 top-full z-header mt-2 w-56 rounded-md border border-line-divider bg-surface p-2 shadow-lg"
+                            class="absolute right-0 top-full z-header mt-2 w-[14rem] rounded-md border border-line-divider bg-surface p-2 shadow-lg"
                         >
                             @foreach ($moreNavItems as $item)
                                 <a

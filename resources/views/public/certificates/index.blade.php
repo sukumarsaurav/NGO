@@ -12,7 +12,7 @@
         @else
             <div class="space-y-4">
                 @foreach ($certificates as $certificate)
-                    <div class="flex flex-col gap-3 rounded-lg border border-line-divider bg-surface p-5 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="flex flex-col gap-3 rounded-lg border border-line-divider bg-surface p-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <p class="font-semibold text-content">{{ $certificate->title }}</p>
                             @if ($certificate->issuing_authority)

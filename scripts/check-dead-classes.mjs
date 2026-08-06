@@ -107,7 +107,11 @@ for (const dir of SOURCE_DIRS) {
                 if (ALLOW.has(token)) continue;
                 // Skip interpolation, PHP/JS operators, and anything not class-shaped.
                 if (/[{}$@()?=<>|&!]/.test(token)) continue;
-                if (!/^[a-z0-9][a-z0-9:./[\]#%_-]*$/i.test(token)) continue;
+                // Leading `-` allowed (negative utilities like `-top-2.5`, `lg:-mt-4`) —
+                // previously excluded here, which is how `-top-2.5` shipped a badge sitting
+                // on top of the ₹1,000 preset amount with nobody catching it. See
+                // docs/11-UI-UX-AUDIT-HOME-CAMPAIGNS.md §1.6.
+                if (!/^-?[a-z0-9][a-z0-9:./[\]#%_-]*$/i.test(token)) continue;
                 // A bare word with no dash/slash is an app class or a stray keyword, not a utility.
                 if (!/[-/]/.test(token)) continue;
                 if (generated.has(token)) continue;

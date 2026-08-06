@@ -130,6 +130,7 @@ export default {
             sans: 'var(--font-sans)',
             deva: 'var(--font-deva)',
             heading: 'var(--font-heading)',
+            mono: 'var(--font-mono)',
         },
         fontSize: {
             xs:   ['var(--text-xs)',   { lineHeight: 'var(--leading-xs)' }],
@@ -141,6 +142,7 @@ export default {
             '3xl':['var(--text-3xl)',  { lineHeight: 'var(--leading-3xl)' }],
             '4xl':['var(--text-4xl)',  { lineHeight: 'var(--leading-4xl)' }],
             '5xl':['var(--text-5xl)',  { lineHeight: 'var(--leading-5xl)' }],
+            '6xl':['var(--text-6xl)',  { lineHeight: 'var(--leading-6xl)' }],
         },
 
         // --- SHAPE & DEPTH -----------------------------------------------------------

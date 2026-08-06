@@ -46,6 +46,13 @@ class SettingsSeeder extends Seeder
         ['key' => 'org.80g_number', 'value' => null, 'type' => 'string', 'group' => 'organisation'],
         ['key' => 'org.80g_valid_from', 'value' => null, 'type' => 'string', 'group' => 'organisation'],
         ['key' => 'org.80g_valid_to', 'value' => null, 'type' => 'string', 'group' => 'organisation'],
+        // NITI Aayog Darpan registration ID and audit-standard label shown in the campaign
+        // page's "NGO Legal Verification" modal — previously hard-coded literals
+        // (`AACTV1234F20231` and friends) in campaigns/show.blade.php. See
+        // docs/11-UI-UX-AUDIT-HOME-CAMPAIGNS.md §5 and
+        // docs/12-REMEDIATION-PLAN-HOME-CAMPAIGNS.md PR 5.1.
+        ['key' => 'org.darpan_id', 'value' => null, 'type' => 'string', 'group' => 'organisation'],
+        ['key' => 'org.audit_standard', 'value' => 'Annual Public Financial Audit', 'type' => 'string', 'group' => 'organisation'],
         ['key' => 'org.csr_number', 'value' => null, 'type' => 'string', 'group' => 'organisation'],
         ['key' => 'org.authorised_signatory_name', 'value' => null, 'type' => 'string', 'group' => 'organisation'],
         ['key' => 'org.authorised_signatory_designation', 'value' => null, 'type' => 'string', 'group' => 'organisation'],

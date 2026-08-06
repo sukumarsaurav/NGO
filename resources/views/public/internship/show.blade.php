@@ -6,16 +6,16 @@
             outreach and operations in the social sector.
         </p>
 
-        <div class="mb-10 grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div class="rounded-lg border border-line-divider bg-surface p-5 text-center">
+        <div class="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div class="rounded-lg border border-line-divider bg-surface p-4 text-center">
                 <p class="mb-1 font-semibold text-content">Hands-on work</p>
                 <p class="text-sm text-content-muted">Work directly on live campaigns, outreach and field programmes, not busywork.</p>
             </div>
-            <div class="rounded-lg border border-line-divider bg-surface p-5 text-center">
+            <div class="rounded-lg border border-line-divider bg-surface p-4 text-center">
                 <p class="mb-1 font-semibold text-content">Mentorship</p>
                 <p class="text-sm text-content-muted">Guided by our team throughout the internship, with regular feedback.</p>
             </div>
-            <div class="rounded-lg border border-line-divider bg-surface p-5 text-center">
+            <div class="rounded-lg border border-line-divider bg-surface p-4 text-center">
                 <p class="mb-1 font-semibold text-content">Certificate</p>
                 <p class="text-sm text-content-muted">A completion certificate and letter of recommendation for strong performers.</p>
             </div>

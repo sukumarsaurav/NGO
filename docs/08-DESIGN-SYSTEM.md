@@ -154,12 +154,17 @@ Fonts CDN request on the critical path.
 | `text-3xl` | 30 / 1.875 | 1.25 | 700 | `h2` |
 | `text-4xl` | 36 / 2.25 | 1.2 | 700 | `h1` mobile |
 | `text-5xl` | 48 / 3 | 1.1 | 700 | `h1` desktop, hero |
+| `text-6xl` | 60 / 3.75 | 1.05 | 900 | Homepage hero display size only — added for `home.blade.php`'s `<h1>` at `lg:`, see docs/11-UI-UX-AUDIT-HOME-CAMPAIGNS.md §1.6/§1.2. Do not reach for it elsewhere; `text-5xl` remains the desktop `h1` default. |
 
 **16px is a hard floor for any input on mobile.** iOS Safari zooms the viewport when focusing an input
 under 16px, which on the donation form reads as a bug and loses donations.
 
 Tabular numerals (`font-variant-numeric: tabular-nums`) on every money figure, progress percentage and
 donor count, so digits do not jitter as values update.
+
+**`font-mono`** (`ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace`) — registration/
+identifier numbers only (80G, 12A, NITI Aayog Darpan ID on the campaign credentials modal), where a donor
+visually compares the rendered value against a printed certificate. Not for body copy.
 
 ---
 

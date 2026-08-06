@@ -39,13 +39,20 @@
             <img
                 src="{{ $firstBanner ? \Illuminate\Support\Facades\Storage::disk('public')->url($firstBanner->image_path) : asset('images/hero-volunteer.png') }}"
                 alt="{{ $firstBanner->title ?? 'Volunteer helping elderly woman' }}"
-                class="absolute inset-0 h-full w-full object-cover object-right"
+                class="absolute inset-0 h-full w-full object-cover object-[75%_center] lg:object-right"
             />
-            {{-- Light warm overlay on left so text is crisp while the natural golden bokeh photo shows through --}}
-            <div class="absolute inset-0 bg-gradient-to-r from-[#fcf9f2]/85 via-[#fcf9f2]/40 via-45% to-transparent"></div>
+            {{-- Two scrims, breakpoint-switched, not one gradient doing both jobs.
+                 Below `lg` the layout stacks and the copy spans the full width, so it needs
+                 a bottom-up scrim it can sit on. At `lg` the copy lives in the left 58% only,
+                 so the original left-to-right scrim is still correct there. Docs
+                 06-UI-UX-FOUNDATION.md §2: "Hero copy … never directly on an uncontrolled
+                 image" — the single horizontal gradient left the stacked layout with ~3%
+                 alpha behind the paragraph. See docs/11-UI-UX-AUDIT-HOME-CAMPAIGNS.md §2.1. --}}
+            <div class="absolute inset-0 bg-gradient-to-t from-[#fcf9f2] via-[#fcf9f2]/85 via-60% to-[#fcf9f2]/20 lg:hidden"></div>
+            <div class="absolute inset-0 hidden bg-gradient-to-r from-[#fcf9f2]/85 via-[#fcf9f2]/40 via-45% to-transparent lg:block"></div>
         </div>
 
-        <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-20 flex flex-col lg:flex-row items-center justify-between gap-10 min-h-[500px]">
+        <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16 flex flex-col lg:flex-row items-center justify-between gap-8 min-h-[28rem] lg:min-h-[32rem]">
 
             {{-- Left Column: Typography & CTAs --}}
             <div class="w-full lg:w-7/12 flex flex-col items-start">
@@ -57,22 +64,25 @@
 
                 @if ($firstBanner)
                     {{-- Main Title --}}
-                    <h1 class="font-heading text-3xl sm:text-5xl lg:text-6xl font-black text-gray-900 uppercase leading-[1.1] tracking-tight mb-4">
+                    <h1 class="font-heading text-3xl sm:text-5xl lg:text-6xl font-black text-content uppercase leading-[1.1] tracking-tight mb-4">
                         {{ $firstBanner->title }}
                     </h1>
 
-                    {{-- Divider with Heart --}}
-                    <div class="flex items-center gap-3 w-40 mb-6">
-                        <div class="h-[2px] flex-1 bg-brand-800/30"></div>
+                    {{-- Divider with Heart. Fixed intrinsic widths, not `w-40` + `flex-1` —
+                         `w-40` was a dead class (spacing scale has no `40`), so the parent
+                         shrank to its 40px intrinsic size and both rules computed to
+                         `width: 0`. See docs/11-UI-UX-AUDIT-HOME-CAMPAIGNS.md §1.5. --}}
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="h-px w-16 bg-brand-800/30"></div>
                         <svg class="h-4 w-4 text-brand-800" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path d="M12.001 19.653l-1.34-1.22C5.4 13.86 2 10.77 2 6.98 2 4.24 4.24 2 6.98 2c1.55 0 3.04.72 4.02 1.85A5.34 5.34 0 0115.02 2C17.76 2 20 4.24 20 6.98c0 3.79-3.4 6.88-8.66 11.46l-1.33 1.21Z"/>
                         </svg>
-                        <div class="h-[2px] flex-1 bg-brand-800/30"></div>
+                        <div class="h-px w-16 bg-brand-800/30"></div>
                     </div>
 
                     @if ($firstBanner->subtitle)
                         {{-- Paragraph --}}
-                        <p class="text-base sm:text-lg text-gray-700 max-w-lg mb-8 leading-relaxed">
+                        <p class="text-base sm:text-lg text-content-muted max-w-lg mb-8 leading-relaxed">
                             {{ $firstBanner->subtitle }}
                         </p>
                     @endif
@@ -80,7 +90,7 @@
                     @if ($firstBanner->cta_label)
                         {{-- Action Button --}}
                         <div class="flex items-center">
-                            <x-button :href="$firstBanner->url() ?? route('donate.show')" variant="accent" size="xl" :pill="true" class="uppercase tracking-wider">
+                            <x-button :href="$firstBanner->url() ?? route('donate.show')" variant="primary" size="xl" :pill="true" class="uppercase tracking-wider">
                                 {{ $firstBanner->cta_label }}
                                 <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
@@ -90,29 +100,29 @@
                     @endif
                 @else
                     {{-- Main Title --}}
-                    <h1 class="font-heading text-3xl sm:text-5xl lg:text-6xl font-black text-gray-900 uppercase leading-[1.1] tracking-tight mb-4">
+                    <h1 class="font-heading text-3xl sm:text-5xl lg:text-6xl font-black text-content uppercase leading-[1.1] tracking-tight mb-4">
                         TOGETHER, <br/>
                         WE CAN BRING <br/>
                         <span class="text-brand-800">CHANGE</span>
                     </h1>
 
-                    {{-- Divider with Heart --}}
-                    <div class="flex items-center gap-3 w-40 mb-6">
-                        <div class="h-[2px] flex-1 bg-brand-800/30"></div>
+                    {{-- Divider with Heart — see the matching comment in the `$firstBanner` branch above. --}}
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="h-px w-16 bg-brand-800/30"></div>
                         <svg class="h-4 w-4 text-brand-800" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path d="M12.001 19.653l-1.34-1.22C5.4 13.86 2 10.77 2 6.98 2 4.24 4.24 2 6.98 2c1.55 0 3.04.72 4.02 1.85A5.34 5.34 0 0115.02 2C17.76 2 20 4.24 20 6.98c0 3.79-3.4 6.88-8.66 11.46l-1.33 1.21Z"/>
                         </svg>
-                        <div class="h-[2px] flex-1 bg-brand-800/30"></div>
+                        <div class="h-px w-16 bg-brand-800/30"></div>
                     </div>
 
                     {{-- Paragraph --}}
-                    <p class="text-base sm:text-lg text-gray-700 max-w-lg mb-8 leading-relaxed">
+                    <p class="text-base sm:text-lg text-content-muted max-w-lg mb-8 leading-relaxed">
                         We work for the well-being of humanity by helping the underprivileged and spreading hope, love and care.
                     </p>
 
                     {{-- Action Button --}}
                     <div class="flex items-center">
-                        <x-button :href="route('donate.show')" variant="accent" size="xl" :pill="true" class="uppercase tracking-wider">
+                        <x-button :href="route('donate.show')" variant="primary" size="xl" :pill="true" class="uppercase tracking-wider">
                             Join Us in Making a Difference
                             <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
@@ -122,16 +132,12 @@
                 @endif
             </div>
 
-            {{-- Right Column: Floating Badge over image --}}
-            <div class="w-full lg:w-5/12 flex justify-end items-end mt-6 lg:mt-0">
-                <div class="bg-[#f5efe0]/95 border border-[#e2d5bd] rounded-2xl p-4 sm:p-5 shadow-xl rotate-[-2deg] flex flex-col items-center text-center max-w-[200px]">
-                    <span class="text-xs sm:text-sm font-serif italic text-gray-700">Every Act of</span>
-                    <span class="text-base sm:text-lg font-extrabold text-brand-900 leading-tight">Kindness Counts</span>
-                    <svg class="h-4 w-4 text-brand-800 mt-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M12.001 19.653l-1.34-1.22C5.4 13.86 2 10.77 2 6.98 2 4.24 4.24 2 6.98 2c1.55 0 3.04.72 4.02 1.85A5.34 5.34 0 0115.02 2C17.76 2 20 4.24 20 6.98c0 3.79-3.4 6.88-8.66 11.46l-1.33 1.21Z"/>
-                    </svg>
-                </div>
-            </div>
+            {{-- The decorative "Every Act of Kindness Counts" sticker that used to sit here
+                 has been removed — it was purely decorative, landed on the subject's face at
+                 desktop widths, and was the sole consumer of four dead classes (`font-serif`,
+                 `rounded-2xl`, `shadow-xl`, `sm:p-5`). See
+                 docs/11-UI-UX-AUDIT-HOME-CAMPAIGNS.md §4.12 and
+                 docs/12-REMEDIATION-PLAN-HOME-CAMPAIGNS.md D5. --}}
         </div>
     </section>
 
@@ -141,9 +147,18 @@
         @if ($featuredCampaigns->isNotEmpty())
             <section class="mb-12">
                 <h2 class="mb-4 text-2xl font-bold text-content">Featured Campaigns</h2>
-                <div class="flex gap-4 overflow-x-auto pb-2">
+                {{-- `role`/`aria-label`/`tabindex` so the rail is announced and keyboard-
+                     scrollable — it previously had none. `.scroll-rail` (tokens.css) gives
+                     it the edge-fade mask already used by the portal nav, so the clipped
+                     last card reads as "more to scroll" rather than a rendering error. See
+                     docs/11-UI-UX-AUDIT-HOME-CAMPAIGNS.md §2.7. --}}
+                <div class="scroll-rail flex gap-4 overflow-x-auto pb-2" role="region" aria-label="Featured campaigns" tabindex="0">
                     @foreach ($featuredCampaigns as $campaign)
-                        <div class="w-[18rem] flex-shrink-0"><x-campaigns.card :campaign="$campaign" /></div>
+                        {{-- `h-full` — without it the card collapses to its own content
+                             height inside the flex item, so cards of differing content
+                             length stagger their CTAs out of line. See
+                             docs/11-UI-UX-AUDIT-HOME-CAMPAIGNS.md §2.6. --}}
+                        <div class="w-[18rem] flex-shrink-0"><x-campaigns.card :campaign="$campaign" class="h-full" /></div>
                     @endforeach
                 </div>
             </section>
@@ -180,7 +195,10 @@
                     @endforeach
                 </div>
 
-                <x-button variant="accent" size="lg" :pill="true" :href="route('donate.show')">
+                {{-- `primary` (green), not `accent` (amber) — this leads directly to giving
+                     money, so it carries the colour 06-UI-UX-FOUNDATION.md §2 reserves for
+                     that. See docs/11-UI-UX-AUDIT-HOME-CAMPAIGNS.md §2.3. --}}
+                <x-button variant="primary" size="lg" :pill="true" :href="route('donate.show')">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                         <path d="M12.001 19.653l-1.34-1.22C5.4 13.86 2 10.77 2 6.98 2 4.24 4.24 2 6.98 2c1.55 0 3.04.72 4.02 1.85A5.34 5.34 0 0115.02 2C17.76 2 20 4.24 20 6.98c0 3.79-3.4 6.88-8.66 11.46l-1.33 1.21Z" />
                     </svg>
@@ -196,7 +214,21 @@
         @if ($categories->isNotEmpty())
             <section class="mb-12">
                 <h2 class="mb-4 text-2xl font-bold text-content">Browse by Cause</h2>
-                <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+                {{-- Column count follows the data instead of being guessed, same `match()`
+                     pattern as `$statColsClass` above — literal arms only, Tailwind's scanner
+                     can't see an interpolated class. Six seeded categories in a fixed
+                     `lg:grid-cols-4` left an orphaned row of two; this picks 3+3 for that
+                     case. See docs/11-UI-UX-AUDIT-HOME-CAMPAIGNS.md §3.3. --}}
+                @php
+                    $categoryCount = $categories->count();
+                    $categoryColsClass = match (true) {
+                        $categoryCount <= 2 => 'sm:grid-cols-2 lg:grid-cols-2',
+                        $categoryCount === 3 || $categoryCount % 3 === 0 => 'sm:grid-cols-3 lg:grid-cols-3',
+                        $categoryCount % 4 === 0 => 'sm:grid-cols-2 lg:grid-cols-4',
+                        default => 'sm:grid-cols-3 lg:grid-cols-4',
+                    };
+                @endphp
+                <div class="grid grid-cols-2 gap-4 {{ $categoryColsClass }}">
                     @foreach ($categories as $category)
                         <a
                             href="{{ route('campaigns.category', $category->slug) }}"

@@ -24,32 +24,46 @@
         <div class="mb-6">
             {{-- A radiogroup, not a row of buttons: the presets are one choice with one answer,
                  which is what `role="radio"` + `aria-checked` conveys and a plain button row
-                 does not. --}}
+                 does not.
+
+                 `grid-cols-2` at every width, not `sm:grid-cols-4` — `sm:` keys off the
+                 *viewport*, not this card's container, and this card sits in a ~360px
+                 sidebar on desktop. Four columns there measured 59.7px chips holding up to
+                 63px of label — the same bug the name/email/phone fields below were
+                 stacked to avoid (see the comment at that section). 2×2 is what mobile
+                 already rendered correctly. See docs/11-UI-UX-AUDIT-HOME-CAMPAIGNS.md §1.1.
+
+                 The per-amount impact tag ("1 Week Food", "1 Month Medical") that used to
+                 sit under each figure has been removed — it was keyed off the rupee value
+                 alone, with no relationship to the actual campaign, so a ₹500 gift to a
+                 paediatric-surgery campaign was labelled "1 Week Food". That is a factual
+                 claim to a donor, invented in this template. A real per-campaign version
+                 belongs on `campaign_products`, not here. --}}
             <p id="amount-presets-label" class="mb-3 block text-sm font-semibold text-content">Select Donation Amount</p>
-            <div class="grid grid-cols-2 gap-2 sm:grid-cols-4" role="radiogroup" aria-labelledby="amount-presets-label">
+            <div class="grid grid-cols-2 gap-2" role="radiogroup" aria-labelledby="amount-presets-label">
                 @foreach ($this->presets() as $presetPaise)
                     @php
                         $presetVal = (int) ($presetPaise / 100);
-                        $presetTag = match(true) {
-                            $presetVal <= 500 => '1 Week Food',
-                            $presetVal <= 1000 => 'Shelter & Kit',
-                            $presetVal <= 2500 => '1 Month Medical',
-                            default => 'Critical Care',
-                        };
                         $isPopular = $presetVal === 1000;
                     @endphp
+                    {{-- Selection is now carried by border + fill (`border-action bg-trust
+                         text-trust-text`, 10.08:1), not a 30%-alpha ring on a light tint —
+                         `aria-checked` covers the non-visual channel regardless. `pt-4`
+                         gives the "Popular" badge somewhere to sit without it landing on top
+                         of the amount (`-top-2.5` was a dead class — the spacing scale has
+                         no `2.5` — so it rendered at its static position, directly over the
+                         ₹1,000 figure). --}}
                     <button
                         type="button"
                         role="radio"
                         aria-checked="{{ $selectedPreset === $presetPaise ? 'true' : 'false' }}"
                         wire:click="selectPreset({{ $presetPaise }})"
-                        class="relative flex flex-col items-center justify-center rounded-lg border p-3 transition-all duration-fast text-center {{ $selectedPreset === $presetPaise ? 'border-brand-700 bg-brand-50/80 text-brand-900 ring-2 ring-brand-600/30' : 'border-line-divider bg-surface text-content hover:border-brand-300 hover:bg-surface-muted' }}"
+                        class="relative flex flex-col items-center justify-center rounded-lg border p-3 pt-4 transition-all duration-fast text-center {{ $selectedPreset === $presetPaise ? 'border-action bg-trust text-trust-text' : 'border-line-divider bg-surface text-content hover:border-brand-300 hover:bg-surface-muted' }}"
                     >
                         @if ($isPopular)
-                            <span class="absolute -top-2.5 rounded-full bg-brand-800 px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-white shadow-xs">Popular</span>
+                            <span class="absolute -top-3 rounded-full bg-brand-800 px-2 py-1 text-[0.65rem] font-bold uppercase tracking-wider text-white shadow-sm">Popular</span>
                         @endif
                         <span class="font-heading text-lg font-bold">₹{{ number_format($presetVal) }}</span>
-                        <span class="text-[0.7rem] text-content-muted mt-0.5 line-clamp-1">{{ $presetTag }}</span>
                     </button>
                 @endforeach
             </div>
@@ -66,12 +80,16 @@
             />
 
             @if ($amount && (float) $amount > 0)
-                <div class="mt-3 flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50/80 p-2.5 text-xs text-emerald-900">
-                    <svg class="h-4 w-4 shrink-0 text-emerald-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span><strong>80G Tax Savings:</strong> Save approx. <strong>₹{{ number_format((float)$amount * 0.5) }}</strong> in income tax (50% deduction under Sec 80G).</span>
-                </div>
+                {{-- Was a hand-rolled div using `border-emerald-200 bg-emerald-50/80
+                     text-emerald-900` — all three dead, so this rendered with a near-black
+                     border on a transparent background: the single most persuasive line in
+                     the donation flow reading as an error rather than a benefit. `<x-alert>`
+                     is the existing tinted-success component with a measured 8.60:1 pair and
+                     an icon that already carries the "success" meaning — no new markup
+                     needed. See docs/11-UI-UX-AUDIT-HOME-CAMPAIGNS.md §1.2. --}}
+                <x-alert variant="success" class="mt-3 text-xs">
+                    <strong>80G Tax Savings:</strong> Save approx. <strong>₹{{ number_format((float)$amount * 0.5) }}</strong> in income tax (50% deduction under Sec 80G).
+                </x-alert>
             @endif
         </div>
 

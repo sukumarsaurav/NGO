@@ -43,6 +43,37 @@ it('rate limits repeated submissions from the same IP, per Sprint 15\'s flood-pr
     RateLimiter::clear('donate:127.0.0.1');
 });
 
+it('preselects the matching preset chip on mount when the default amount matches one', function () {
+    // Default amount is '1000' rupees = 100000 paise, the second of the four default
+    // presets (500/1000/2500/5000). Before this fix the form opened with an amount
+    // filled in but no chip highlighted — two controls disagreeing about the same
+    // value. See docs/11-UI-UX-AUDIT-HOME-CAMPAIGNS.md §1.1.
+    Livewire::test(DonationForm::class)
+        ->assertSet('amount', '1000')
+        ->assertSet('selectedPreset', 100000);
+});
+
+it('does not preselect a preset when the initial amount matches none of them', function () {
+    Livewire::test(DonationForm::class)
+        ->set('amount', '777')
+        ->assertSet('selectedPreset', null);
+});
+
+it('syncs the amount field when a preset chip is selected', function () {
+    Livewire::test(DonationForm::class)
+        ->call('selectPreset', 250000)
+        ->assertSet('selectedPreset', 250000)
+        ->assertSet('amount', '2500');
+});
+
+it('clears the selected preset when the donor types a custom amount', function () {
+    Livewire::test(DonationForm::class)
+        ->call('selectPreset', 250000)
+        ->assertSet('selectedPreset', 250000)
+        ->set('amount', '1234')
+        ->assertSet('selectedPreset', null);
+});
+
 it('initiates a donation and dispatches the razorpay-open event with the order details', function () {
     Livewire::test(DonationForm::class)
         ->set('amount', '1000')

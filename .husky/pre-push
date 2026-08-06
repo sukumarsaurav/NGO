@@ -1,0 +1,6 @@
+# Catches the class of bug in docs/10-UI-UX-AUDIT.md and
+# docs/11-UI-UX-AUDIT-HOME-CAMPAIGNS.md §1.6: tailwind.config.js REPLACES Tailwind's
+# scales, so a class outside them compiles to nothing with no build error. CI runs the
+# same check (.github/workflows/ci.yml), but that only catches it after the work is
+# pushed and shared. Run it here first.
+npm run build --silent && npm run check:classes

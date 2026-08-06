@@ -15,7 +15,7 @@
             </x-empty-state>
         @else
             @foreach ($grouped as $category => $group)
-                <section class="mb-10">
+                <section class="mb-12">
                     @if ($category)
                         <h2 class="mb-4 text-lg font-semibold text-content">{{ $category }}</h2>
                     @endif

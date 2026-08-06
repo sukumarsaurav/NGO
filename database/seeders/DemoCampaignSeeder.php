@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Actions\Campaigns\RecalculateCampaignTotals;
 use App\Models\Campaign;
 use App\Models\CampaignCategory;
+use App\Models\Donation;
+use App\Models\Donor;
 use App\Models\ImpactStat;
 use App\Models\Testimonial;
 use Illuminate\Database\Seeder;
@@ -43,12 +46,57 @@ class DemoCampaignSeeder extends Seeder
         foreach ($this->campaignData() as $data) {
             $categorySlug = $data['category_slug'];
             unset($data['category_slug']);
+            $donorCount = (int) $data['donor_count'];
+            $raisedAmount = (int) $data['raised_amount'];
 
-            Campaign::query()->firstOrCreate(
+            $campaign = Campaign::query()->firstOrCreate(
                 ['slug' => $data['slug']],
                 [...$data, 'category_id' => $categories[$categorySlug] ?? $categories->first()]
             );
+
+            // Only on first creation — `firstOrCreate` is idempotent for the campaign row,
+            // but without this guard re-running the seeder would pile up a second batch of
+            // donations against the same campaign every time.
+            if ($campaign->wasRecentlyCreated && $donorCount > 0) {
+                $this->seedDonations($campaign, $donorCount, $raisedAmount);
+            }
         }
+    }
+
+    /**
+     * Real Donor + succeeded Donation rows backing this campaign's donor_count — a stored
+     * counter with no donations behind it is exactly how
+     * docs/11-UI-UX-AUDIT-HOME-CAMPAIGNS.md §2.2 shipped "Donors (214)" directly above
+     * "Be the first to donate." on the campaign page's own trust surface.
+     *
+     * One donation per donor (no repeat givers in the demo data), amount jittered ±40%
+     * around the average so the total lands close to — not necessarily exact — the
+     * campaign's designed `raised_amount`; `RecalculateCampaignTotals` below is what makes
+     * the stored `raised_amount`/`donor_count` actually correct, not this arithmetic.
+     */
+    private function seedDonations(Campaign $campaign, int $donorCount, int $raisedAmountPaise): void
+    {
+        $average = intdiv(max($raisedAmountPaise, $donorCount * 5_000), $donorCount);
+        $spread = max(1, (int) ($average * 0.4));
+
+        for ($i = 0; $i < $donorCount; $i++) {
+            $donor = Donor::factory()->create();
+            $amount = max(5_000, $average + fake()->numberBetween(-$spread, $spread));
+
+            Donation::factory()->succeeded()->create([
+                'donor_id' => $donor->id,
+                'campaign_id' => $campaign->id,
+                'amount' => $amount,
+                'items_amount' => 0,
+                'free_amount' => $amount,
+                'donated_at' => now()->subDays(fake()->numberBetween(0, 120)),
+            ]);
+        }
+
+        // Derives the campaign's stored `raised_amount`/`donor_count` from the rows just
+        // created, rather than trusting the design literals in campaignData() to match —
+        // the same reconciler the nightly command runs in production.
+        app(RecalculateCampaignTotals::class)->handle($campaign);
     }
 
     /**

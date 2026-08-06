@@ -6,16 +6,16 @@
             impact.
         </p>
 
-        <div class="mb-10 grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div class="rounded-lg border border-line-divider bg-surface p-5 text-center">
+        <div class="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div class="rounded-lg border border-line-divider bg-surface p-4 text-center">
                 <p class="mb-1 font-semibold text-content">Verified impact</p>
                 <p class="text-sm text-content-muted">Every campaign we run is verified, with regular updates showing exactly how funds are used.</p>
             </div>
-            <div class="rounded-lg border border-line-divider bg-surface p-5 text-center">
+            <div class="rounded-lg border border-line-divider bg-surface p-4 text-center">
                 <p class="mb-1 font-semibold text-content">80G tax benefit</p>
                 <p class="text-sm text-content-muted">Contributions carry a full 80G tax-exemption receipt for your organisation.</p>
             </div>
-            <div class="rounded-lg border border-line-divider bg-surface p-5 text-center">
+            <div class="rounded-lg border border-line-divider bg-surface p-4 text-center">
                 <p class="mb-1 font-semibold text-content">Tailored reporting</p>
                 <p class="text-sm text-content-muted">We provide impact reports suited to your CSR committee's documentation needs.</p>
             </div>

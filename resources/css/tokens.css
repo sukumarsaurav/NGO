@@ -127,6 +127,10 @@
   /* Heading font — bold display weight, applied per-section (not a global h1-h6
      sweep) to headings in the homepage/campaign-card pass. See docs/08-DESIGN-SYSTEM.md. */
   --font-heading: 'Montserrat', var(--font-sans);
+  /* Numeric/identifier font — 80G/12A/Darpan registration numbers on the campaign page's
+     credentials modal, so a donor visually comparing a rendered ID against a printed
+     certificate reads fixed-width glyphs, not proportional ones. */
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
 
   --text-xs:   0.75rem;   --leading-xs:   1.4;
   --text-sm:   0.875rem;  --leading-sm:   1.45;
@@ -137,6 +141,7 @@
   --text-3xl:  1.875rem;  --leading-3xl:  1.25;
   --text-4xl:  2.25rem;   --leading-4xl:  1.2;
   --text-5xl:  3rem;      --leading-5xl:  1.1;
+  --text-6xl:  3.75rem;   --leading-6xl:  1.05;  /* homepage hero display size only */
 
   /* ---------------------------------------------------------------------------------
      4. SPACE — 4px base

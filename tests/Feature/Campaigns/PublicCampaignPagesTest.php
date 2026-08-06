@@ -120,6 +120,55 @@ it('stops a closed campaign from accepting new donations while keeping the page 
     $response->assertOk()->assertSeeText('closed');
 });
 
+it('hides the Donors section and its nav entry entirely for a campaign with zero donors', function () {
+    // Was: "Donors (0)" heading directly above "Be the first to donate." — now
+    // suppressed the same way an empty Updates section already was. See
+    // docs/11-UI-UX-AUDIT-HOME-CAMPAIGNS.md §3.6 and
+    // docs/12-REMEDIATION-PLAN-HOME-CAMPAIGNS.md PR 2.4/PR 3.3.
+    $campaign = Campaign::factory()->active()->create(['donor_count' => 0]);
+
+    $response = $this->get(route('campaigns.show', $campaign->slug));
+
+    $response->assertOk()->assertDontSeeText('Donors (0)')->assertDontSeeText('Be the first to donate.');
+});
+
+it('shows the real donor count in the Donors heading, matching the wall beneath it', function () {
+    $campaign = Campaign::factory()->active()->create(['goal_amount' => 100000, 'raised_amount' => 0, 'donor_count' => 0]);
+
+    $initiation = app(InitiateDonation::class)->handle(
+        donorName: 'Count Match Donor',
+        donorEmail: 'countmatch@example.com',
+        donorPhone: null,
+        amount: Money::fromRupees(500),
+        campaignId: $campaign->id,
+    );
+    app(RecordSuccessfulDonation::class)->handle($initiation->order->orderId, new PaymentResult(
+        paymentId: 'pay_countmatch1',
+        orderId: $initiation->order->orderId,
+        status: 'captured',
+        amount: Money::fromRupees(500),
+    ));
+
+    $response = $this->get(route('campaigns.show', $campaign->slug));
+
+    $response->assertOk()->assertSeeText('Donors (1)')->assertSeeText('Count Match Donor');
+});
+
+it('shows a "chosen to stay private" message, never "Be the first to donate", when donor_count is positive but the wall is empty', function () {
+    // A data-consistency edge case (e.g. a manual DB edit) rather than the normal path —
+    // the normal path is exercised by the two tests above. This is the defensive copy
+    // that stops a stale/incorrect donor_count from contradicting the visible donor
+    // list. See docs/11-UI-UX-AUDIT-HOME-CAMPAIGNS.md §2.2.
+    $campaign = Campaign::factory()->active()->create(['donor_count' => 5]);
+
+    $response = $this->get(route('campaigns.show', $campaign->slug));
+
+    $response->assertOk()
+        ->assertSeeText('Donors (5)')
+        ->assertSeeText('All donors to this campaign have chosen to stay private.')
+        ->assertDontSeeText('Be the first to donate.');
+});
+
 it('404s a draft campaign on the public route', function () {
     $campaign = Campaign::factory()->create(['status' => 'draft']);
 
