@@ -18,6 +18,12 @@
     `full`. Added for the homepage/campaign-card redesign's pill-shaped CTAs — the default
     stays rounded-md so this is additive, not a visual change to any existing call site.
 
+    `spread` swaps `justify-center` for `justify-between`, for the "amount left, label right"
+    pattern the donation form's step-1 CTA needs (`₹3,000` … `Continue →`) — see
+    docs/13-CAMPAIGN-DETAIL-DESIGN-AUDIT-VS-REFERENCE.md PR D. A first-class prop rather than
+    a one-off `!justify-between` override at the call site, since this is a real button
+    variant other CTAs showing a value alongside an action label can reuse.
+
     SIZE / TOUCH TARGET — one deliberate deviation from §10.1, flagged rather than silent:
     the spec lists `base` as 40px while also requiring a 44×44 minimum touch target. 40px
     cannot satisfy that, so `base` is 44px here. `sm` (32px) stays admin-only and must never
@@ -29,10 +35,11 @@
     'full' => false,
     'pill' => false,
     'href' => null,
+    'spread' => false,
 ])
 
 @php
-    $base = 'inline-flex items-center justify-center gap-2 font-semibold '
+    $base = 'inline-flex items-center '.($spread ? 'justify-between' : 'justify-center').' gap-2 font-semibold '
         .'transition-colors duration-fast disabled:cursor-not-allowed disabled:opacity-60';
 
     $sizes = [

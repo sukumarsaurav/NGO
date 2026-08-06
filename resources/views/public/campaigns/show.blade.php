@@ -55,9 +55,15 @@
 
              Instead: source order is title/image → card → the rest, which is exactly the
              mobile order, and on `lg` the explicit row/column placement lifts the card into
-             the right-hand column spanning both rows. --}}
-        <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
-            <div class="lg:col-span-2 lg:col-start-1 lg:row-start-1">
+             the right-hand column spanning both rows.
+
+             `lg:grid-cols-12` at a 7/5 split (content/sidebar), not the previous 3-column
+             2/1 (66%/33%) split — the reference's own measured proportions are 12 columns
+             at 7/5 (~58%/42%), which is *why* its 4 preset pills fit one row comfortably
+             where ours needed a 2×2 grid at the narrower width. See
+             docs/13-CAMPAIGN-DETAIL-DESIGN-AUDIT-VS-REFERENCE.md PR G. --}}
+        <div class="grid grid-cols-1 gap-8 lg:grid-cols-12">
+            <div class="lg:col-span-7 lg:col-start-1 lg:row-start-1">
                 <div class="relative mb-4 aspect-video overflow-hidden rounded-lg bg-surface-muted">
                     @if ($coverUrl)
                         <img src="{{ $coverUrl }}" alt="{{ $campaign->cover_image_alt ?: $campaign->title }}" class="h-full w-full object-cover">
@@ -106,7 +112,7 @@
                 </div>
             </div>
 
-            <div class="lg:col-start-3 lg:row-start-1 lg:row-span-2">
+            <div class="lg:col-span-5 lg:col-start-8 lg:row-start-1 lg:row-span-2">
                 {{-- `top-24` clears the 64px header with room to spare. `max-h` + internal
                      scroll so the sidebar can always fit and stick — the unbounded card
                      measured 839.8px, taller than the ~704px usable height below the header
@@ -121,7 +127,7 @@
                 </div>
             </div>
 
-            <div class="lg:col-span-2 lg:col-start-1 lg:row-start-2">
+            <div class="lg:col-span-7 lg:col-start-1 lg:row-start-2">
                 {{-- `top-16` clears the 64px sticky header; `z-sticky-nav` (100) is the
                      layer allocated to exactly this element in 08-DESIGN-SYSTEM §6. It sits
                      below `z-header` (200) deliberately — the header wins the overlap.
@@ -237,14 +243,22 @@
                     </section>
                 @endif
 
-                <section id="story" class="scroll-mt-[6.5rem] prose prose-sm mb-12 max-w-none text-content">
+                {{-- Framed as a real card (border, shadow, generous padding), not a bare
+                     heading over bare text — the reference wraps its story in exactly this
+                     kind of surface. `prose` moves onto the inner div since the outer
+                     `<section>` now needs its own border/padding classes without the
+                     typography plugin's own spacing fighting them. See
+                     docs/13-CAMPAIGN-DETAIL-DESIGN-AUDIT-VS-REFERENCE.md PR E. --}}
+                <section id="story" class="scroll-mt-[6.5rem] mb-12 rounded-lg border border-line-divider bg-surface p-6 shadow-sm sm:p-12">
                     <h2 class="mb-3 font-heading text-xl font-bold text-content">Story</h2>
-                    {{-- The story is edited via Filament's RichEditor and stores
-                         real HTML — rendered raw here, not escaped, or every
-                         paragraph and bold word would show as literal markup.
-                         Sanitized regardless of the trusted-admin source —
-                         see the same note on portal/notices/show.blade.php. --}}
-                    {!! str($campaign->story)->sanitizeHtml() !!}
+                    <div class="prose prose-sm max-w-none text-content">
+                        {{-- The story is edited via Filament's RichEditor and stores
+                             real HTML — rendered raw here, not escaped, or every
+                             paragraph and bold word would show as literal markup.
+                             Sanitized regardless of the trusted-admin source —
+                             see the same note on portal/notices/show.blade.php. --}}
+                        {!! str($campaign->story)->sanitizeHtml() !!}
+                    </div>
                 </section>
 
                 {{-- Moved out of the sticky sidebar — see the comment on that div above

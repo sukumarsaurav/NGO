@@ -29,7 +29,10 @@ it('renders the Products section and steppers when a campaign has catalogue item
 
     $response = $this->get(route('campaigns.show', $campaign->slug));
 
-    $response->assertOk()->assertSeeText('Medicine kit')->assertSeeText('11 / 1500 Donated');
+    // "11 / 1500" + a separate "1%" — see
+    // docs/13-CAMPAIGN-DETAIL-DESIGN-AUDIT-VS-REFERENCE.md PR F: the fraction dropped its
+    // trailing "Donated" when the card became icon-led rather than photo-led.
+    $response->assertOk()->assertSeeText('Medicine kit')->assertSeeText('11 / 1500');
 });
 
 it('shows global FAQs on every campaign and campaign-specific FAQs only on their own campaign', function () {

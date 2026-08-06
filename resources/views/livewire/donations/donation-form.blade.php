@@ -22,16 +22,33 @@
         @endif
 
         <div class="mb-6">
+            {{-- Custom amount now leads, presets follow — the reference leads with the
+                 amount input and treats presets as shortcuts under it, not the other way
+                 round. See docs/13-CAMPAIGN-DETAIL-DESIGN-AUDIT-VS-REFERENCE.md PR C.
+                 `.live.debounce` so the submit button's amount tracks what has been typed. --}}
+            <x-form.field
+                name="amount"
+                label="Select Donation Amount (₹)"
+                type="number"
+                min="1"
+                inputmode="numeric"
+                wire:model.live.debounce.400ms="amount"
+            />
+
             {{-- A radiogroup, not a row of buttons: the presets are one choice with one answer,
                  which is what `role="radio"` + `aria-checked` conveys and a plain button row
                  does not.
 
-                 `grid-cols-2` at every width, not `sm:grid-cols-4` — `sm:` keys off the
-                 *viewport*, not this card's container, and this card sits in a ~360px
-                 sidebar on desktop. Four columns there measured 59.7px chips holding up to
-                 63px of label — the same bug the name/email/phone fields below were
-                 stacked to avoid (see the comment at that section). 2×2 is what mobile
-                 already rendered correctly. See docs/11-UI-UX-AUDIT-HOME-CAMPAIGNS.md §1.1.
+                 `grid grid-cols-4`, one row at every width — the previous `sm:grid-cols-4`
+                 was the actual bug (`sm:` keys off the *viewport*, not this card's
+                 container), not the 4-column count itself. That, plus each chip then
+                 carrying a "1 Week Food"-style impact tag, is what produced 59.7px chips
+                 holding up to 63px of label. The tag is gone (see below), so a chip is now
+                 just "₹500" — a fixed `grid-cols-4` fits every width this card actually
+                 renders at, matching the reference's own single-row layout without the
+                 uneven wrap a `flex-wrap` row produces once four items stop dividing evenly
+                 into the available width. See docs/11-UI-UX-AUDIT-HOME-CAMPAIGNS.md §1.1 and
+                 docs/13-CAMPAIGN-DETAIL-DESIGN-AUDIT-VS-REFERENCE.md §3.
 
                  The per-amount impact tag ("1 Week Food", "1 Month Medical") that used to
                  sit under each figure has been removed — it was keyed off the rupee value
@@ -39,14 +56,14 @@
                  paediatric-surgery campaign was labelled "1 Week Food". That is a factual
                  claim to a donor, invented in this template. A real per-campaign version
                  belongs on `campaign_products`, not here. --}}
-            <p id="amount-presets-label" class="mb-3 block text-sm font-semibold text-content">Select Donation Amount</p>
-            <div class="grid grid-cols-2 gap-2" role="radiogroup" aria-labelledby="amount-presets-label">
+            <div class="mt-3 grid grid-cols-4 gap-2" role="radiogroup" aria-labelledby="amount-presets-label">
+                <span id="amount-presets-label" class="sr-only">Quick amount</span>
                 @foreach ($this->presets() as $presetPaise)
                     @php
                         $presetVal = (int) ($presetPaise / 100);
                         $isPopular = $presetVal === 1000;
                     @endphp
-                    {{-- Selection is now carried by border + fill (`border-action bg-trust
+                    {{-- Selection is carried by border + fill (`border-action bg-trust
                          text-trust-text`, 10.08:1), not a 30%-alpha ring on a light tint —
                          `aria-checked` covers the non-visual channel regardless. `pt-4`
                          gives the "Popular" badge somewhere to sit without it landing on top
@@ -67,17 +84,6 @@
                     </button>
                 @endforeach
             </div>
-
-            {{-- `.live.debounce` so the submit button's amount tracks what has been typed. --}}
-            <x-form.field
-                class="mt-3"
-                name="amount"
-                label="Other amount (₹)"
-                type="number"
-                min="1"
-                inputmode="numeric"
-                wire:model.live.debounce.400ms="amount"
-            />
 
             @if ($amount && (float) $amount > 0)
                 {{-- Was a hand-rolled div using `border-emerald-200 bg-emerald-50/80
@@ -104,8 +110,36 @@
             @endif
         </div>
 
-        <x-button type="button" size="xl" full wire:click="nextStep">
-            Continue
+        {{-- "Pay via" — a trust signal the reference has and this page didn't: a donor
+             deciding whether to trust a payment form wants to see recognisable payment
+             methods before committing. Plain text chips, matching the pattern the footer
+             already uses for the same content (`public-footer.blade.php`), rather than
+             sourcing four new logo image assets for one row. See
+             docs/13-CAMPAIGN-DETAIL-DESIGN-AUDIT-VS-REFERENCE.md PR C. --}}
+        <div class="mb-4">
+            <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-content-muted">Pay via</p>
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-content-muted">
+                <span>UPI</span>
+                <span>Visa</span>
+                <span>Mastercard</span>
+                <span>RuPay</span>
+                <span>Net Banking</span>
+            </div>
+        </div>
+
+        {{-- `spread` puts the amount on the left and the label on the right of one control
+             — the reference's donate button shows the amount being committed to at the
+             point of commitment; this one previously said only "Continue", with the amount
+             invisible until the next step. See
+             docs/13-CAMPAIGN-DETAIL-DESIGN-AUDIT-VS-REFERENCE.md PR D. --}}
+        <x-button type="button" size="xl" full :spread="true" wire:click="nextStep">
+            <span>&#8377;{{ number_format((float) ($amount ?: 0)) }}</span>
+            <span class="flex items-center gap-1">
+                Continue
+                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+            </span>
         </x-button>
     @else
         <button type="button" wire:click="previousStep" class="mb-4 flex min-h-touch items-center gap-1 text-sm font-semibold text-content-muted hover:text-content">
