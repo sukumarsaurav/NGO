@@ -47,10 +47,14 @@
                     <p class="text-[0.65rem] uppercase tracking-wide text-content-muted">Unit price</p>
                     <p class="font-semibold text-content">₹{{ number_format($product->unit_price / 100) }}</p>
                 </div>
-                <div class="flex items-center gap-2">
-                    <button type="button" wire:click="decrement({{ $product->id }})" class="flex h-8 w-8 items-center justify-center rounded-full border border-line text-content hover:bg-surface-muted" aria-label="Decrease quantity">−</button>
-                    <span class="w-6 text-center text-content">{{ $quantities[$product->id] ?? 0 }}</span>
-                    <button type="button" wire:click="increment({{ $product->id }})" class="flex h-8 w-8 items-center justify-center rounded-full border border-line text-content hover:bg-surface-muted" aria-label="Increase quantity">+</button>
+                {{-- `pulse` gives the count a felt click response the instant a button is
+                     pressed — optimistic, local, and immediate, rather than waiting on the
+                     Livewire round trip that actually updates the number. See
+                     docs/14-UI-UX-AUDIT-LIVE-SITE-PAGE-BY-PAGE.md §3. --}}
+                <div class="flex items-center gap-2" x-data="{ pulse: false }">
+                    <button type="button" wire:click="decrement({{ $product->id }})" @click="pulse = true; setTimeout(() => pulse = false, 150)" class="flex h-8 w-8 items-center justify-center rounded-full border border-line text-content hover:bg-surface-muted" aria-label="Decrease quantity">−</button>
+                    <span class="inline-block w-6 text-center text-content transition-transform duration-fast ease-out" :class="pulse ? 'scale-110' : 'scale-100'">{{ $quantities[$product->id] ?? 0 }}</span>
+                    <button type="button" wire:click="increment({{ $product->id }})" @click="pulse = true; setTimeout(() => pulse = false, 150)" class="flex h-8 w-8 items-center justify-center rounded-full border border-line text-content hover:bg-surface-muted" aria-label="Increase quantity">+</button>
                 </div>
             </div>
         </div>

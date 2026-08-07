@@ -295,3 +295,13 @@ html {
 :lang(hi) {
   font-family: var(--font-deva);
 }
+
+/* `wire:navigate`'s built-in top-of-page loading bar, in brand colour instead of its
+   `#29d` default — Livewire reads this one custom property, not a class or id selector
+   (vendor/livewire/livewire/dist/livewire.js). See
+   docs/14-UI-UX-AUDIT-LIVE-SITE-PAGE-BY-PAGE.md §0 — adopting `wire:navigate` site-wide is
+   the single highest-leverage motion change available: every internal link becomes an
+   instant client-side transition instead of a full page reload. */
+:root {
+  --livewire-progress-bar-color: var(--color-action);
+}

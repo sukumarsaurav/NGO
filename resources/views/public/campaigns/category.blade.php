@@ -6,9 +6,9 @@
 <x-layout.public :title="$metaTitle" :description="$metaDescription" :title-is-complete="true">
     <div class="w-full max-w-6xl">
         <nav aria-label="Breadcrumb" class="mb-4 text-sm text-content-muted">
-            <a href="{{ url('/') }}" class="hover:text-link">Home</a>
+            <a href="{{ url('/') }}" wire:navigate class="hover:text-link">Home</a>
             <span class="mx-1">/</span>
-            <a href="{{ route('campaigns.index') }}" class="hover:text-link">Campaigns</a>
+            <a href="{{ route('campaigns.index') }}" wire:navigate class="hover:text-link">Campaigns</a>
             <span class="mx-1">/</span>
             <span>{{ $category->name }}</span>
         </nav>
@@ -33,7 +33,7 @@
         @else
             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach ($campaigns as $campaign)
-                    <x-campaigns.card :campaign="$campaign" />
+                    <x-campaigns.card :campaign="$campaign" :reveal="$loop->index" />
                 @endforeach
             </div>
 

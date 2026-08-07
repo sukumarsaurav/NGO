@@ -36,6 +36,12 @@
     'pill' => false,
     'href' => null,
     'spread' => false,
+    // Every current call site's `href` is an internal route — `wire:navigate` (Livewire's
+    // client-side page swap) is on by default so adopting it site-wide didn't mean touching
+    // every call site individually. Set `:navigate="false"` for anything that must be a real
+    // full navigation (an external URL, or a link that has to survive a full document
+    // reload). See docs/14-UI-UX-AUDIT-LIVE-SITE-PAGE-BY-PAGE.md §0.
+    'navigate' => true,
 ])
 
 @php
@@ -65,7 +71,7 @@
 @endphp
 
 @if ($href)
-    <a href="{{ $href }}" {{ $attributes->merge(['class' => $classes]) }}>{{ $slot }}</a>
+    <a href="{{ $href }}" @if ($navigate) wire:navigate @endif {{ $attributes->merge(['class' => $classes]) }}>{{ $slot }}</a>
 @else
     <button {{ $attributes->merge(['type' => 'submit', 'class' => $classes]) }}>{{ $slot }}</button>
 @endif

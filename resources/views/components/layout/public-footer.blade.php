@@ -34,8 +34,20 @@
             <h2 class="mb-2 font-heading text-xl font-bold text-white sm:text-2xl">Stay in the loop</h2>
             <p class="mb-6 text-sm text-brand-200">Get updates on campaigns and the impact your support makes.</p>
 
+            {{-- Entrance transition instead of appearing fully-formed — see
+                 docs/14-UI-UX-AUDIT-LIVE-SITE-PAGE-BY-PAGE.md §0/§9. Not `<x-flash-message>`:
+                 that component's default styling (tinted box, dark text) is built for a
+                 light card, not this dark photo band. --}}
             @if (session('status'))
-                <p class="mb-3 text-sm text-accent-300">{{ session('status') }}</p>
+                <p
+                    x-data="{ shown: false }"
+                    x-init="$nextTick(() => shown = true)"
+                    x-show="shown"
+                    x-cloak
+                    x-transition:enter="transition duration-base ease-out"
+                    x-transition:enter-start="opacity-0 -translate-y-1"
+                    class="mb-3 text-sm text-accent-300"
+                >{{ session('status') }}</p>
             @endif
             {{-- Two inline `style=` attributes used to bypass the token system entirely here
                  (a raw `var(--accent-400)`/`var(--brand-900)` button and a raw
@@ -70,26 +82,26 @@
         <div>
             <p class="mb-3 text-sm font-semibold text-content">Explore</p>
             <ul class="space-y-2 text-sm text-content-muted">
-                <li><a href="{{ route('campaigns.index') }}" class="hover:text-link">Campaigns</a></li>
-                <li><a href="{{ route('campaigns.monthly-giving') }}" class="hover:text-link">Monthly Giving</a></li>
-                <li><a href="{{ route('fundraiser.show') }}" class="hover:text-link">Start a Fundraise</a></li>
-                <li><a href="{{ route('donate.show') }}" class="hover:text-link">How to Donate</a></li>
+                <li><a href="{{ route('campaigns.index') }}" wire:navigate class="hover:text-link">Campaigns</a></li>
+                <li><a href="{{ route('campaigns.monthly-giving') }}" wire:navigate class="hover:text-link">Monthly Giving</a></li>
+                <li><a href="{{ route('fundraiser.show') }}" wire:navigate class="hover:text-link">Start a Fundraise</a></li>
+                <li><a href="{{ route('donate.show') }}" wire:navigate class="hover:text-link">How to Donate</a></li>
             </ul>
         </div>
 
         <div>
             <p class="mb-3 text-sm font-semibold text-content">Information</p>
             <ul class="space-y-2 text-sm text-content-muted">
-                <li><a href="{{ route('pages.show', 'about') }}" class="hover:text-link">About</a></li>
-                <li><a href="{{ route('blog.index') }}" class="hover:text-link">Blog</a></li>
-                <li><a href="{{ route('contact.show') }}" class="hover:text-link">Contact</a></li>
-                <li><a href="{{ route('gallery.index') }}" class="hover:text-link">Gallery</a></li>
-                <li><a href="{{ route('partners.index') }}" class="hover:text-link">Partners</a></li>
-                <li><a href="{{ route('certificates.index') }}" class="hover:text-link">Certificates</a></li>
-                <li><a href="{{ route('csr-partnership.show') }}" class="hover:text-link">CSR Partnership</a></li>
-                <li><a href="{{ route('internship.show') }}" class="hover:text-link">Internship</a></li>
-                <li><a href="{{ route('pages.show', 'privacy-policy') }}" class="hover:text-link">Privacy Policy</a></li>
-                <li><a href="{{ route('pages.show', 'terms-conditions') }}" class="hover:text-link">Terms &amp; Conditions</a></li>
+                <li><a href="{{ route('pages.show', 'about') }}" wire:navigate class="hover:text-link">About</a></li>
+                <li><a href="{{ route('blog.index') }}" wire:navigate class="hover:text-link">Blog</a></li>
+                <li><a href="{{ route('contact.show') }}" wire:navigate class="hover:text-link">Contact</a></li>
+                <li><a href="{{ route('gallery.index') }}" wire:navigate class="hover:text-link">Gallery</a></li>
+                <li><a href="{{ route('partners.index') }}" wire:navigate class="hover:text-link">Partners</a></li>
+                <li><a href="{{ route('certificates.index') }}" wire:navigate class="hover:text-link">Certificates</a></li>
+                <li><a href="{{ route('csr-partnership.show') }}" wire:navigate class="hover:text-link">CSR Partnership</a></li>
+                <li><a href="{{ route('internship.show') }}" wire:navigate class="hover:text-link">Internship</a></li>
+                <li><a href="{{ route('pages.show', 'privacy-policy') }}" wire:navigate class="hover:text-link">Privacy Policy</a></li>
+                <li><a href="{{ route('pages.show', 'terms-conditions') }}" wire:navigate class="hover:text-link">Terms &amp; Conditions</a></li>
             </ul>
         </div>
 

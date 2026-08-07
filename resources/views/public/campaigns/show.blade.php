@@ -26,9 +26,9 @@
          page is scrolled to the bottom. See docs/11-UI-UX-AUDIT-HOME-CAMPAIGNS.md §6. --}}
     <div class="w-full max-w-6xl pb-24 lg:pb-0">
         <nav aria-label="Breadcrumb" class="mb-4 text-sm text-content-muted">
-            <a href="{{ url('/') }}" class="hover:text-link">Home</a>
+            <a href="{{ url('/') }}" wire:navigate class="hover:text-link">Home</a>
             <span class="mx-1">/</span>
-            <a href="{{ route('campaigns.category', $campaign->category->slug) }}" class="hover:text-link">{{ $campaign->category->name }}</a>
+            <a href="{{ route('campaigns.category', $campaign->category->slug) }}" wire:navigate class="hover:text-link">{{ $campaign->category->name }}</a>
             <span class="mx-1">/</span>
             <span>{{ $campaign->title }}</span>
         </nav>
@@ -136,9 +136,28 @@
                      an empty Updates/Donors section drops its nav entry along with the
                      section itself instead of inviting a click into nothing. See
                      docs/11-UI-UX-AUDIT-HOME-CAMPAIGNS.md §3.6. --}}
-                <nav class="sticky top-16 z-sticky-nav mb-6 flex flex-wrap gap-6 border-b border-line-divider bg-background py-2 text-sm font-medium text-content-muted" aria-label="Campaign sections">
+                {{-- Scrollspy — same underline-wipe treatment as the header nav (§ above),
+                     tracking the section currently near the top of the viewport instead of
+                     the current page. See docs/14-UI-UX-AUDIT-LIVE-SITE-PAGE-BY-PAGE.md §3. --}}
+                <nav
+                    x-data="scrollspyNav({{ $sectionNav->pluck('id')->toJson() }})"
+                    class="sticky top-16 z-sticky-nav mb-6 flex flex-wrap gap-6 border-b border-line-divider bg-background py-2 text-sm font-medium text-content-muted"
+                    aria-label="Campaign sections"
+                >
                     @foreach ($sectionNav as $item)
-                        <a href="#{{ $item['id'] }}" class="hover:text-content">{{ $item['label'] }}</a>
+                        <a
+                            href="#{{ $item['id'] }}"
+                            :aria-current="active === '{{ $item['id'] }}' ? 'true' : null"
+                            class="group relative py-1 transition-colors duration-fast"
+                            :class="active === '{{ $item['id'] }}' ? 'text-content' : 'hover:text-content'"
+                        >
+                            {{ $item['label'] }}
+                            <span
+                                aria-hidden="true"
+                                class="absolute inset-x-0 -bottom-2 h-[2px] origin-left rounded-full bg-action transition-transform duration-fast ease-out"
+                                :class="active === '{{ $item['id'] }}' ? 'scale-x-100' : 'scale-x-0'"
+                            ></span>
+                        </a>
                     @endforeach
                 </nav>
 
@@ -302,7 +321,17 @@
                             <button type="button" role="tab" id="donors-tab-generous" aria-controls="donors-panel-generous" :aria-selected="(tab === 'generous').toString()" @click="tab = 'generous'" :class="tab === 'generous' ? 'bg-action text-action-on' : 'bg-surface text-content'" class="rounded-full px-3 py-1 font-medium">Most Generous</button>
                         </div>
 
-                        <ul id="donors-panel-recent" role="tabpanel" aria-labelledby="donors-tab-recent" x-show="tab === 'recent'" class="divide-y divide-line-divider rounded-lg border border-line-divider">
+                        {{-- `x-transition` cross-fade — these swapped with a hard cut before,
+                             despite `x-show` already being in place; only the transition
+                             directives were missing. See
+                             docs/14-UI-UX-AUDIT-LIVE-SITE-PAGE-BY-PAGE.md §3. --}}
+                        <ul
+                            id="donors-panel-recent" role="tabpanel" aria-labelledby="donors-tab-recent"
+                            x-show="tab === 'recent'"
+                            x-transition:enter="transition duration-fast ease-out" x-transition:enter-start="opacity-0"
+                            x-transition:leave="transition duration-fast ease-in-out" x-transition:leave-end="opacity-0"
+                            class="divide-y divide-line-divider rounded-lg border border-line-divider"
+                        >
                             @forelse ($recentDonors as $donor)
                                 <li class="flex items-center justify-between px-4 py-2 text-sm">
                                     <span class="text-content">{{ $donor['name'] }}</span>
@@ -312,7 +341,12 @@
                                 <li class="px-4 py-4 text-sm text-content-muted">All donors to this campaign have chosen to stay private.</li>
                             @endforelse
                         </ul>
-                        <ul id="donors-panel-generous" role="tabpanel" aria-labelledby="donors-tab-generous" x-show="tab === 'generous'" x-cloak class="divide-y divide-line-divider rounded-lg border border-line-divider">
+                        <ul
+                            id="donors-panel-generous" role="tabpanel" aria-labelledby="donors-tab-generous"
+                            x-show="tab === 'generous'"
+                            x-transition:enter="transition duration-fast ease-out" x-transition:enter-start="opacity-0"
+                            x-transition:leave="transition duration-fast ease-in-out" x-transition:leave-end="opacity-0"
+                            x-cloak class="divide-y divide-line-divider rounded-lg border border-line-divider">
                             @forelse ($topDonors as $donor)
                                 <li class="flex items-center justify-between px-4 py-2 text-sm">
                                     <span class="text-content">{{ $donor['name'] }}</span>
@@ -346,7 +380,11 @@
                                         {{ $faq->question }}
                                         <span x-text="open === {{ $index }} ? '−' : '+'" aria-hidden="true"></span>
                                     </button>
-                                    <div id="faq-panel-{{ $index }}" x-show="open === {{ $index }}" x-cloak class="px-4 pb-3 text-sm text-content-muted">
+                                    {{-- `x-collapse` animates height instead of `x-show`'s hard
+                                         `display:none` cut — an FAQ that snaps open read as
+                                         noticeably dated next to the rest of this page. See
+                                         docs/14-UI-UX-AUDIT-LIVE-SITE-PAGE-BY-PAGE.md §3. --}}
+                                    <div id="faq-panel-{{ $index }}" x-show="open === {{ $index }}" x-collapse x-cloak class="px-4 pb-3 text-sm text-content-muted">
                                         {{ $faq->answer }}
                                     </div>
                                 </div>
@@ -360,7 +398,7 @@
                         <h2 class="mb-4 font-heading text-xl font-bold text-content">Related campaigns</h2>
                         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                             @foreach ($relatedCampaigns as $related)
-                                <x-campaigns.card :campaign="$related" class="h-full" />
+                                <x-campaigns.card :campaign="$related" :reveal="$loop->index" class="h-full" />
                             @endforeach
                         </div>
                     </section>
@@ -374,7 +412,18 @@
          `accent` (amber) — this is the donate action itself, per §2.3. Scrolls to `#donate`
          directly rather than an untargeted `.lg\:sticky` query. --}}
     @if ($campaign->status->acceptsDonations())
-        <div class="fixed bottom-0 inset-x-0 z-donate-bar lg:hidden border-t border-line-divider bg-surface/95 backdrop-blur-md p-3 shadow-lg">
+        {{-- One-time slide-in on arrival instead of appearing fully-formed on first paint —
+             see docs/14-UI-UX-AUDIT-LIVE-SITE-PAGE-BY-PAGE.md §3. `x-cloak` covers the gap
+             before Alpine hydrates; the short `setTimeout` (rather than firing on mount)
+             gives the entrance a beat to actually read as a slide rather than a flash. --}}
+        <div
+            x-data="{ shown: false }"
+            x-init="setTimeout(() => shown = true, 100)"
+            x-show="shown"
+            x-cloak
+            x-transition:enter="transition-transform duration-base ease-out"
+            x-transition:enter-start="translate-y-full"
+            class="fixed bottom-0 inset-x-0 z-donate-bar lg:hidden border-t border-line-divider bg-surface/95 backdrop-blur-md p-3 shadow-lg">
             <div class="flex items-center justify-between gap-3">
                 <div class="min-w-0 flex-1">
                     <p class="truncate text-xs font-semibold text-content">{{ $campaign->title }}</p>

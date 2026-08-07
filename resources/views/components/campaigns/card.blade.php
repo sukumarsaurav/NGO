@@ -18,14 +18,32 @@
     add `class="h-full"` and the card fills its flex/grid cell instead of collapsing to its
     own content height — a card of different length than its siblings previously staggered
     its "Donate Now" button out of line with the row. See §2.6 of the same audit.
+
+    `reveal` (optional, pass the loop index — `:reveal="$loop->index"`) fades + slides the
+    card in the first time it scrolls into view, staggered by index, instead of every card
+    in a grid materialising in its final position simultaneously. Capped at 6 steps × 60ms
+    so a long grid's last few cards don't inherit an ever-growing, eventually-silly delay.
+    Omit the prop entirely for a card that shouldn't participate (kept opt-in rather than
+    default-on, since some call sites render a single card outside any grid context where a
+    stagger has nothing to stagger against). See
+    docs/14-UI-UX-AUDIT-LIVE-SITE-PAGE-BY-PAGE.md §1/§2.
 --}}
-@props(['campaign'])
+@props(['campaign', 'reveal' => null])
 
 @php
     $percent = (int) round($campaign->percentFunded());   // uncapped — <x-progress-bar> caps the bar, §10.4 prints the true number
+    $revealDelayMs = is_null($reveal) ? null : min((int) $reveal, 6) * 60;
 @endphp
 
-<div {{ $attributes->merge(['class' => 'group relative flex flex-col overflow-hidden rounded-lg border border-line-divider bg-surface shadow-sm transition-shadow duration-base hover:shadow-md']) }}>
+<div
+    @if (!is_null($reveal))
+        x-data="{ revealed: false }"
+        x-intersect.once="revealed = true"
+        :class="revealed ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'"
+        style="transition-delay: {{ $revealDelayMs }}ms"
+    @endif
+    {{ $attributes->merge(['class' => 'group relative flex flex-col overflow-hidden rounded-lg border border-line-divider bg-surface shadow-sm hover:shadow-md '.(is_null($reveal) ? 'transition-shadow duration-base' : 'transition-all duration-base ease-out')]) }}
+>
     <div class="relative block aspect-[4/3] bg-surface-muted">
         @if ($campaign->cover_image_path)
             <img src="{{ \Illuminate\Support\Facades\Storage::url($campaign->cover_image_path) }}" alt="" class="h-full w-full object-cover">
@@ -53,7 +71,7 @@
         <h3 class="mb-1 line-clamp-2 font-heading font-bold text-content">
             {{-- The stretched link — this is the card's one and only tab stop.
                  `after:absolute after:inset-0` extends its hit area over the whole card. --}}
-            <a href="{{ route('campaigns.show', $campaign->slug) }}#donate" class="after:absolute after:inset-0 group-hover:text-link">
+            <a href="{{ route('campaigns.show', $campaign->slug) }}#donate" wire:navigate class="after:absolute after:inset-0 group-hover:text-link">
                 {{ $campaign->title }}
             </a>
         </h3>
