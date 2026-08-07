@@ -157,7 +157,7 @@
                      regardless of viewport. `<picture>`'s `<source media>` is evaluated
                      before any request is made, so only the one actually shown is fetched.
                      See docs/11-UI-UX-AUDIT-HOME-CAMPAIGNS.md §3.1. --}}
-                <a href="{{ url('/') }}" class="flex items-center rounded-sm" aria-label="{{ $orgName }} — home">
+                <a href="{{ url('/') }}" wire:navigate class="flex items-center rounded-sm" aria-label="{{ $orgName }} — home">
                     {{-- No `width`/`height` attributes — the two sources have different
                          intrinsic aspect ratios (32×32 mark, 180×32 horizontal), and a
                          single `<img>` can only declare one pair. `aspect-square` /
@@ -173,6 +173,7 @@
                     @foreach ($navItems as $item)
                         <a
                             href="{{ $item['href'] }}"
+                            wire:navigate
                             @if ($item['active']) aria-current="page" @endif
                             class="group relative py-2 transition-colors duration-fast {{ $item['active'] ? 'text-link' : 'text-content hover:text-link' }}"
                         >
@@ -221,6 +222,7 @@
                             @foreach ($moreNavItems as $item)
                                 <a
                                     href="{{ $item['href'] }}"
+                                    wire:navigate
                                     @click="moreOpen = false"
                                     @if ($item['active']) aria-current="page" @endif
                                     class="flex min-h-touch items-center rounded-md px-3 py-2 text-sm transition-colors duration-fast {{ $item['active'] ? 'bg-trust text-trust-text' : 'text-content hover:bg-surface-muted' }}"
@@ -234,10 +236,11 @@
 
                 <div class="flex items-center gap-3">
                     @guest
-                        <a href="{{ route('login') }}" class="hidden rounded-sm text-sm font-medium text-content transition-colors duration-fast hover:text-link sm:inline">Login</a>
+                        <a href="{{ route('login') }}" wire:navigate class="hidden rounded-sm text-sm font-medium text-content transition-colors duration-fast hover:text-link sm:inline">Login</a>
                     @endguest
                     <a
                         href="{{ route('donate.show') }}"
+                        wire:navigate
                         class="inline-flex min-h-touch items-center rounded-md bg-action px-4 py-2 text-sm font-semibold text-action-on transition-colors duration-fast hover:bg-action-hover active:bg-action-active"
                     >
                         Donate
@@ -309,6 +312,7 @@
                 @foreach ($navItems as $item)
                     <a
                         href="{{ $item['href'] }}"
+                        wire:navigate
                         @if ($item['active']) aria-current="page" @endif
                         class="flex min-h-touch items-center rounded-md px-3 py-3 transition-colors duration-fast {{ $item['active'] ? 'bg-trust text-trust-text' : 'text-content hover:bg-surface-muted' }}"
                     >
@@ -320,6 +324,7 @@
                 @foreach ($moreNavItems as $item)
                     <a
                         href="{{ $item['href'] }}"
+                        wire:navigate
                         @if ($item['active']) aria-current="page" @endif
                         class="flex min-h-touch items-center rounded-md px-3 py-3 transition-colors duration-fast {{ $item['active'] ? 'bg-trust text-trust-text' : 'text-content hover:bg-surface-muted' }}"
                     >
@@ -328,7 +333,7 @@
                 @endforeach
 
                 @guest
-                    <a href="{{ route('login') }}" class="flex min-h-touch items-center rounded-md px-3 py-3 text-content transition-colors duration-fast hover:bg-surface-muted">Login</a>
+                    <a href="{{ route('login') }}" wire:navigate class="flex min-h-touch items-center rounded-md px-3 py-3 text-content transition-colors duration-fast hover:bg-surface-muted">Login</a>
                 @endguest
             </nav>
 
@@ -337,6 +342,7 @@
             <div class="border-t border-line-divider p-3">
                 <a
                     href="{{ route('donate.show') }}"
+                    wire:navigate
                     class="flex min-h-touch w-full items-center justify-center rounded-md bg-action px-4 py-3 text-base font-semibold text-action-on transition-colors duration-fast hover:bg-action-hover active:bg-action-active"
                 >
                     Donate

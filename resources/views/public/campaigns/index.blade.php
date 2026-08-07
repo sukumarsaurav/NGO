@@ -7,6 +7,7 @@
             @foreach (['' => 'Newest', 'most-funded' => 'Most funded', 'ending-soon' => 'Ending soon', 'urgent' => 'Urgent'] as $value => $label)
                 <a
                     href="{{ route('campaigns.index', array_filter(['sort' => $value])) }}"
+                    wire:navigate
                     class="rounded-full border px-4 py-2 text-sm font-medium
                         {{ $sort === $value ? 'border-action bg-action text-action-on' : 'border-line text-content hover:bg-surface-muted' }}"
                 >{{ $label }}</a>
@@ -20,7 +21,7 @@
         @else
             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach ($campaigns as $campaign)
-                    <x-campaigns.card :campaign="$campaign" />
+                    <x-campaigns.card :campaign="$campaign" :reveal="$loop->index" />
                 @endforeach
             </div>
 

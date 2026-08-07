@@ -158,7 +158,7 @@
                              height inside the flex item, so cards of differing content
                              length stagger their CTAs out of line. See
                              docs/11-UI-UX-AUDIT-HOME-CAMPAIGNS.md §2.6. --}}
-                        <div class="w-[18rem] flex-shrink-0"><x-campaigns.card :campaign="$campaign" class="h-full" /></div>
+                        <div class="w-[18rem] flex-shrink-0"><x-campaigns.card :campaign="$campaign" :reveal="$loop->index" class="h-full" /></div>
                     @endforeach
                 </div>
             </section>
@@ -167,33 +167,16 @@
         {{-- 3. IMPACT STATS — light bordered/shadowed cards on the page background, not a
              dark banded promo. Matches the hover-lift pattern already used for the "Browse
              by Cause" tiles just below (§4) for visual consistency within this codebase,
-             rather than inventing a new hover treatment. Stat tiles stay width-locked
-             (`min-w-[7rem]`) to avoid CLS if a count-up animation is ever added on top. --}}
+             rather than inventing a new hover treatment. Grid markup + count-up-on-scroll
+             extracted to <x-impact-stats> — reused on /donate. See
+             docs/14-UI-UX-AUDIT-LIVE-SITE-PAGE-BY-PAGE.md §1/§4. --}}
         @if ($impactStats->isNotEmpty())
             <section class="mb-12 text-center">
                 <p class="mb-2 text-sm font-semibold uppercase tracking-wide text-brand-600">Together we can</p>
                 <h2 class="mb-2 font-heading text-2xl font-bold text-content sm:text-3xl">Every contribution creates change</h2>
                 <p class="mx-auto mb-8 max-w-xl text-content-muted">Your support turns directly into food, medicine, school fees and shelter — with a receipt to prove it.</p>
 
-                {{-- Tailwind's scanner only detects LITERAL class strings in source, so the
-                     column count must be one of a fixed set it can actually see — not an
-                     interpolated `sm:grid-cols-{{ $n }}`, which would never get generated. --}}
-                @php
-                    $statColsClass = match (min(4, max(1, $impactStats->count()))) {
-                        1 => 'sm:grid-cols-1',
-                        2 => 'sm:grid-cols-2',
-                        3 => 'sm:grid-cols-3',
-                        default => 'sm:grid-cols-4',
-                    };
-                @endphp
-                <div class="mb-8 grid grid-cols-2 gap-4 {{ $statColsClass }}">
-                    @foreach ($impactStats as $stat)
-                        <div class="min-w-[7rem] rounded-lg border border-line-divider bg-surface p-4 text-center shadow-sm transition-shadow duration-base hover:-translate-y-px hover:shadow-md sm:p-6">
-                            <p class="tabular font-heading text-2xl font-bold text-brand-700 sm:text-3xl">{{ $stat->value }}{{ $stat->suffix }}</p>
-                            <p class="text-xs uppercase tracking-wide text-content-muted">{{ $stat->label }}</p>
-                        </div>
-                    @endforeach
-                </div>
+                <x-impact-stats :stats="$impactStats" class="mb-8" />
 
                 {{-- `primary` (green), not `accent` (amber) — this leads directly to giving
                      money, so it carries the colour 06-UI-UX-FOUNDATION.md §2 reserves for
@@ -230,11 +213,16 @@
                 @endphp
                 <div class="grid grid-cols-2 gap-4 {{ $categoryColsClass }}">
                     @foreach ($categories as $category)
+                        {{-- `hover:-translate-y-1` (was `-translate-y-px`, a 1px shift most
+                             users never consciously register) + the icon chip scaling up —
+                             "this is clickable" reads far more clearly at a felt distance.
+                             See docs/14-UI-UX-AUDIT-LIVE-SITE-PAGE-BY-PAGE.md §1.5. --}}
                         <a
                             href="{{ route('campaigns.category', $category->slug) }}"
-                            class="group flex flex-col items-center gap-3 rounded-lg border border-line-divider bg-surface p-6 text-center transition-shadow duration-base hover:-translate-y-px hover:shadow-md"
+                            wire:navigate
+                            class="group flex flex-col items-center gap-3 rounded-lg border border-line-divider bg-surface p-6 text-center transition-all duration-base hover:-translate-y-1 hover:shadow-md"
                         >
-                            <span class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-success-bg text-success-text transition-colors duration-fast group-hover:bg-action group-hover:text-action-on">
+                            <span class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-success-bg text-success-text transition-all duration-fast group-hover:scale-110 group-hover:bg-action group-hover:text-action-on">
                                 @if ($category->icon_path)
                                     <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($category->icon_path) }}" alt="" class="h-8 w-8 object-contain" aria-hidden="true">
                                 @else
@@ -257,7 +245,7 @@
         <section class="mb-12">
             <div class="mb-4 flex items-center justify-between">
                 <h2 class="text-2xl font-bold text-content">Recent Campaigns</h2>
-                <a href="{{ route('campaigns.index') }}" class="text-sm font-medium text-link hover:text-link-hover">View more</a>
+                <a href="{{ route('campaigns.index') }}" wire:navigate class="text-sm font-medium text-link hover:text-link-hover">View more</a>
             </div>
             @if ($recentCampaigns->isEmpty())
                 <x-empty-state title="No live campaigns">
@@ -266,7 +254,7 @@
             @else
                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     @foreach ($recentCampaigns as $campaign)
-                        <x-campaigns.card :campaign="$campaign" />
+                        <x-campaigns.card :campaign="$campaign" :reveal="$loop->index" />
                     @endforeach
                 </div>
             @endif
@@ -367,11 +355,11 @@
             <section class="mb-12">
                 <div class="mb-4 flex items-center justify-between">
                     <h2 class="text-2xl font-bold text-content">From the Blog</h2>
-                    <a href="{{ route('blog.index') }}" class="text-sm font-medium text-link hover:text-link-hover">View all</a>
+                    <a href="{{ route('blog.index') }}" wire:navigate class="text-sm font-medium text-link hover:text-link-hover">View all</a>
                 </div>
                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
                     @foreach ($blogPosts as $post)
-                        <a href="{{ route('blog.show', $post->slug) }}" class="block overflow-hidden rounded-lg border border-line-divider bg-surface">
+                        <a href="{{ route('blog.show', $post->slug) }}" wire:navigate class="block overflow-hidden rounded-lg border border-line-divider bg-surface">
                             <div class="aspect-video bg-surface-muted">
                                 @if ($post->cover_image_path)
                                     <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($post->cover_image_path) }}" alt="{{ $post->title }}" loading="lazy" class="h-full w-full object-cover">
@@ -397,7 +385,7 @@
             <section class="mb-12">
                 <div class="mb-4 flex items-center justify-between">
                     <h2 class="text-2xl font-bold text-content">Gallery</h2>
-                    <a href="{{ route('gallery.index') }}" class="text-sm font-medium text-link hover:text-link-hover">View all</a>
+                    <a href="{{ route('gallery.index') }}" wire:navigate class="text-sm font-medium text-link hover:text-link-hover">View all</a>
                 </div>
                 <div class="grid grid-cols-3 gap-4 sm:grid-cols-6">
                     @foreach ($galleryPhotos as $photo)
@@ -420,7 +408,7 @@
             <section class="mb-12">
                 <div class="mb-4 flex items-center justify-between">
                     <h2 class="text-sm font-semibold uppercase tracking-wide text-content-muted">Our Partners</h2>
-                    <a href="{{ route('partners.index') }}" class="text-sm font-medium text-link hover:text-link-hover">View all</a>
+                    <a href="{{ route('partners.index') }}" wire:navigate class="text-sm font-medium text-link hover:text-link-hover">View all</a>
                 </div>
                 <div class="flex flex-wrap items-center justify-center gap-8">
                     @foreach ($partners as $partner)
@@ -437,7 +425,7 @@
             <section class="mb-12">
                 <div class="mb-4 flex items-center justify-between">
                     <h2 class="text-2xl font-bold text-content">Certificates &amp; Registrations</h2>
-                    <a href="{{ route('certificates.index') }}" class="text-sm font-medium text-link hover:text-link-hover">View all</a>
+                    <a href="{{ route('certificates.index') }}" wire:navigate class="text-sm font-medium text-link hover:text-link-hover">View all</a>
                 </div>
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     @foreach ($certificates as $certificate)

@@ -15,7 +15,7 @@
         @else
             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach ($campaigns as $campaign)
-                    <x-campaigns.card :campaign="$campaign" />
+                    <x-campaigns.card :campaign="$campaign" :reveal="$loop->index" />
                 @endforeach
             </div>
 
