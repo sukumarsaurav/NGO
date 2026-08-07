@@ -11,7 +11,11 @@ cd "$APP_DIR"
 $PHP artisan down --render="errors::503" --retry=60 || true
 
 git pull origin main
-composer install --no-dev --optimize-autoloader --no-interaction
+# `composer` itself is a `#!/usr/bin/env php` script, so a bare `composer install` resolves
+# PHP from PATH — the account's PHP Selector default, not necessarily $PHP (the domain's
+# actual configured version). Invoking it explicitly under $PHP keeps this in sync with the
+# artisan commands below. See PHP_BIN's comment in .github/workflows/deploy.yml.
+$PHP "$(command -v composer)" install --no-dev --optimize-autoloader --no-interaction
 
 # Frontend assets are built in CI (GitHub Actions, reliable Node) and synced
 # to public/build/ as part of the deploy step BEFORE this script runs — see
