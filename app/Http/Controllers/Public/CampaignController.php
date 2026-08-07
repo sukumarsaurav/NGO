@@ -33,12 +33,17 @@ class CampaignController extends Controller
     public function index(Request $request): View
     {
         $sort = $request->string('sort')->toString();
+        $categorySlug = $request->string('category')->toString();
         $page = (int) $request->integer('page', 1);
 
         $campaigns = $this->paginateCached(
-            "campaigns.index.{$sort}.{$page}",
-            function () use ($sort) {
+            "campaigns.index.{$sort}.{$categorySlug}.{$page}",
+            function () use ($sort, $categorySlug) {
                 $query = Campaign::query()->whereIn('status', $this->publiclyVisibleStatuses());
+
+                if ($categorySlug !== '') {
+                    $query->whereHas('category', fn (Builder $q) => $q->where('slug', $categorySlug));
+                }
 
                 return match ($sort) {
                     'most-funded' => $query->orderByDesc('raised_amount'),
@@ -51,9 +56,27 @@ class CampaignController extends Controller
             $page,
         );
 
+        // Category filter chips alongside the sort pills — previously the only way to
+        // narrow by cause was the homepage's six-tile grid; landing directly on
+        // /campaigns gave no way to do that. See
+        // docs/14-UI-UX-AUDIT-LIVE-SITE-PAGE-BY-PAGE.md §2 / docs/12 PR 5.3.
+        //
+        // Cached as a plain array, not the Eloquent Collection itself —
+        // config('cache.serializable_classes') is false (see paginateCached()'s comment
+        // below), so caching a Collection directly comes back as a broken
+        // __PHP_Incomplete_Class on every read after the first.
+        $categories = collect(Cache::remember('campaigns.index.categories', now()->addMinutes(10), fn () => CampaignCategory::query()
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get(['id', 'name', 'slug'])
+            ->map(fn (CampaignCategory $category) => ['name' => $category->name, 'slug' => $category->slug])
+            ->all()));
+
         return view('public.campaigns.index', [
             'campaigns' => $campaigns,
             'sort' => $sort,
+            'categories' => $categories,
+            'activeCategory' => $categorySlug,
         ]);
     }
 
