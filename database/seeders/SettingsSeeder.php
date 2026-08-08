@@ -83,11 +83,13 @@ class SettingsSeeder extends Seeder
         // `si=` query parameters they arrived with — those are per-share referral tokens,
         // not part of the profile address.
         //
-        // NOTE: the Facebook value is a `/share/` redirect rather than a vanity URL,
-        // because that is what the client provided; swap it for the canonical page URL
-        // when they confirm it. Twitter/LinkedIn stay null — the client named only three
-        // networks, and <x-social-links> drops any that are blank.
-        ['key' => 'social.facebook', 'value' => 'https://www.facebook.com/share/1TP1e9KajR/', 'type' => 'string', 'group' => 'social'],
+        // Facebook is the numeric-id form rather than the `/share/` link it was first given
+        // as: the id is permanent and survives a rename, where a share link is a short-link
+        // that can rot (and cost an extra redirect hop — the share link 302s to exactly
+        // this id). Swap for a vanity URL if one is ever claimed; this will keep working
+        // either way. Twitter/LinkedIn stay null — the client named only three networks,
+        // and <x-social-links> drops any that are blank.
+        ['key' => 'social.facebook', 'value' => 'https://www.facebook.com/profile.php?id=61584117746083', 'type' => 'string', 'group' => 'social'],
         ['key' => 'social.instagram', 'value' => 'https://www.instagram.com/visiongoodworkglobal', 'type' => 'string', 'group' => 'social'],
         ['key' => 'social.twitter', 'value' => null, 'type' => 'string', 'group' => 'social'],
         ['key' => 'social.linkedin', 'value' => null, 'type' => 'string', 'group' => 'social'],
