@@ -262,6 +262,47 @@ Every change verifies through the existing gate before merge: `npx vite build`,
 `node scripts/check-dead-classes.mjs`, `./vendor/bin/pint`, `./vendor/bin/phpstan analyse`,
 `./vendor/bin/pest`.
 
+---
+
+## Status — updated 2026-08-08
+
+Client decisions taken during the session:
+
+| Item | Decision | State |
+|---|---|---|
+| Tagline (§4) | — | **Done**, committed |
+| Colours (§1) | — | **Done**, committed |
+| Socials (§2) | — | **Done**, committed |
+| Demo data | *Remove now* | Command built + tested; **awaiting production run** |
+| Impact stats | *Placeholder — client will send real figures* | Left in place, see caveat below |
+| Video | *YouTube + Instagram strip* | YouTube **done**; Instagram blocked |
+| Real photos (§3) | — | Blocked on client |
+
+**Caveat raised and accepted:** removing the demo campaigns while keeping the placeholder
+impact stats leaves the site claiming "48,500+ meals served" with no campaigns listed. The
+client opted to keep the stats and supply real figures. Until those arrive, the live site
+publishes unverified impact numbers — worth revisiting if the real figures are slow to come.
+
+### What the Instagram strip actually requires
+
+Recorded here because it is entirely client-side setup; no amount of engineering unblocks it.
+(These are Meta's requirements as of the last time I checked — they change periodically, so
+verify before starting.)
+
+1. The Instagram account must be a **Business or Creator** account (not personal).
+2. It must be **linked to the Facebook Page**.
+3. Someone with admin rights on that Page must create a **Meta Developer app**.
+4. The app needs **App Review** approval for Instagram media permissions.
+5. The app issues a **long-lived access token that expires roughly every 60 days**.
+
+Once a token exists, the engineering side is: a cached fetch (never hit Meta per page view),
+a scheduled refresh job before each 60-day expiry, and a graceful empty state so an expired
+token hides the strip instead of breaking the page.
+
+**This is genuine ongoing maintenance for a decorative strip.** The three social links now in
+the footer and on `/contact` already give visitors a route to the live feeds with zero
+dependency on Meta's API. Worth confirming the strip is still wanted before doing the setup.
+
 ## Open questions for the client
 
 1. **Facebook URL** — the supplied link is a `share/` redirect. Is there a canonical page URL?
