@@ -48,6 +48,13 @@
                 @endif
             </div>
         @endif
+
+        {{-- Social profiles as part of the contact details, per the client's 2026-08-08
+             review — this page previously carried no social links at all. --}}
+        <div class="mt-6 text-center">
+            <p class="mb-3 text-sm text-content-muted">Follow our work</p>
+            <x-social-links class="justify-center" />
+        </div>
     </div>
 
     <script type="application/ld+json">

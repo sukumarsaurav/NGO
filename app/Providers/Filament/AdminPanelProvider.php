@@ -44,10 +44,10 @@ class AdminPanelProvider extends PanelProvider
             // 2.68:1 failure the whole palette was corrected to avoid.
             // See docs/08-DESIGN-SYSTEM.md §12.
             ->colors([
-                'primary' => Color::hex('#1f7a4d'),
+                'primary' => Color::hex('#0d7c2f'),
                 'danger' => Color::hex('#c0392b'),
                 'warning' => Color::hex('#945b14'),
-                'success' => Color::hex('#1f7a4d'),
+                'success' => Color::hex('#0d7c2f'),
                 'info' => Color::hex('#1f5f7a'),
             ])
             // Off by decision, not omission — docs/08-DESIGN-SYSTEM.md §11.

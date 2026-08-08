@@ -79,11 +79,21 @@ class SettingsSeeder extends Seeder
         ['key' => 'receipt.80g_deduction_statement', 'value' => 'This donation is eligible for deduction under Section 80G of the Income Tax Act, 1961, subject to the limits and conditions specified therein.', 'type' => 'string', 'group' => 'receipt'],
 
         // --- social --------------------------------------------------------
-        ['key' => 'social.facebook', 'value' => null, 'type' => 'string', 'group' => 'social'],
-        ['key' => 'social.instagram', 'value' => null, 'type' => 'string', 'group' => 'social'],
+        // Live profiles, supplied by the client 2026-08-08. Stored without the `igsh=` /
+        // `si=` query parameters they arrived with — those are per-share referral tokens,
+        // not part of the profile address.
+        //
+        // Facebook is the numeric-id form rather than the `/share/` link it was first given
+        // as: the id is permanent and survives a rename, where a share link is a short-link
+        // that can rot (and cost an extra redirect hop — the share link 302s to exactly
+        // this id). Swap for a vanity URL if one is ever claimed; this will keep working
+        // either way. Twitter/LinkedIn stay null — the client named only three networks,
+        // and <x-social-links> drops any that are blank.
+        ['key' => 'social.facebook', 'value' => 'https://www.facebook.com/profile.php?id=61584117746083', 'type' => 'string', 'group' => 'social'],
+        ['key' => 'social.instagram', 'value' => 'https://www.instagram.com/visiongoodworkglobal', 'type' => 'string', 'group' => 'social'],
         ['key' => 'social.twitter', 'value' => null, 'type' => 'string', 'group' => 'social'],
         ['key' => 'social.linkedin', 'value' => null, 'type' => 'string', 'group' => 'social'],
-        ['key' => 'social.youtube', 'value' => null, 'type' => 'string', 'group' => 'social'],
+        ['key' => 'social.youtube', 'value' => 'https://youtube.com/@visiongoodworkglobal', 'type' => 'string', 'group' => 'social'],
 
         // --- homepage — sections 6-8, docs/06-UI-UX-FOUNDATION.md §7 ---------
         ['key' => 'homepage.serve_heading', 'value' => null, 'type' => 'string', 'group' => 'homepage'],
@@ -93,6 +103,13 @@ class SettingsSeeder extends Seeder
         ['key' => 'homepage.monthly_body', 'value' => null, 'type' => 'string', 'group' => 'homepage'],
         ['key' => 'homepage.steps', 'value' => [], 'type' => 'json', 'group' => 'homepage'],
         ['key' => 'homepage.newsletter_heading', 'value' => null, 'type' => 'string', 'group' => 'homepage'],
+        // Featured YouTube videos — embedded directly, which needs no API key, no access
+        // token and no Meta/Google app review, unlike the Instagram feed. Admin pastes
+        // ordinary watch/share URLs; <x-youtube-embed> extracts the id. See
+        // docs/15-CLIENT-FEEDBACK-REMEDIATION-PLAN.md §3.
+        ['key' => 'homepage.video_heading', 'value' => 'See our work', 'type' => 'string', 'group' => 'homepage'],
+        ['key' => 'homepage.video_body', 'value' => null, 'type' => 'string', 'group' => 'homepage'],
+        ['key' => 'homepage.videos', 'value' => [], 'type' => 'json', 'group' => 'homepage'],
 
         // --- seo -------------------------------------------------------------
         // Kept under 60 characters per docs/07-SEO.md §4 — the settings page

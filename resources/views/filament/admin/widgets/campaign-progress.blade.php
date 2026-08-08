@@ -13,7 +13,7 @@
                             <span style="color:#55524a;">&#8377;{{ number_format($campaign['raised'] / 100, 0) }} / &#8377;{{ number_format($campaign['goal'] / 100, 0) }}</span>
                         </div>
                         <div style="height:0.5rem;width:100%;overflow:hidden;border-radius:9999px;background:#f0eee7;">
-                            <div style="height:0.5rem;border-radius:9999px;background:#1f7a4d;width:{{ min($campaign['percent'], 100) }}%"></div>
+                            <div style="height:0.5rem;border-radius:9999px;background:#0d7c2f;width:{{ min($campaign['percent'], 100) }}%"></div>
                         </div>
                     </div>
                 @endforeach

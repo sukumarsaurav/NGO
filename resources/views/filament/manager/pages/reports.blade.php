@@ -8,14 +8,14 @@
             <button
                 type="button"
                 wire:click="selectReport('member_roster')"
-                style="border-radius:0.375rem;padding:0.375rem 0.75rem;font-size:0.875rem;font-weight:500;{{ $activeReport === 'member_roster' ? 'background:#1f7a4d;color:#ffffff;' : 'background:#f0eee7;color:#55524a;' }}"
+                style="border-radius:0.375rem;padding:0.375rem 0.75rem;font-size:0.875rem;font-weight:500;{{ $activeReport === 'member_roster' ? 'background:#0d7c2f;color:#ffffff;' : 'background:#f0eee7;color:#55524a;' }}"
             >
                 Member Roster
             </button>
             <button
                 type="button"
                 wire:click="selectReport('document_issue_log')"
-                style="border-radius:0.375rem;padding:0.375rem 0.75rem;font-size:0.875rem;font-weight:500;{{ $activeReport === 'document_issue_log' ? 'background:#1f7a4d;color:#ffffff;' : 'background:#f0eee7;color:#55524a;' }}"
+                style="border-radius:0.375rem;padding:0.375rem 0.75rem;font-size:0.875rem;font-weight:500;{{ $activeReport === 'document_issue_log' ? 'background:#0d7c2f;color:#ffffff;' : 'background:#f0eee7;color:#55524a;' }}"
             >
                 Document Issue Log
             </button>

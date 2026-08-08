@@ -11,7 +11,7 @@
                 <button
                     type="button"
                     wire:click="selectReport('{{ $tab['key'] }}')"
-                    style="border-radius:0.375rem;padding:0.375rem 0.75rem;font-size:0.875rem;font-weight:500;{{ $tab['key'] === $activeReport ? 'background:#1f7a4d;color:#ffffff;' : 'background:#f0eee7;color:#55524a;' }}"
+                    style="border-radius:0.375rem;padding:0.375rem 0.75rem;font-size:0.875rem;font-weight:500;{{ $tab['key'] === $activeReport ? 'background:#0d7c2f;color:#ffffff;' : 'background:#f0eee7;color:#55524a;' }}"
                 >
                     {{ $tab['label'] }}
                 </button>

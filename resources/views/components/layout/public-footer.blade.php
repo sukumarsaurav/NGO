@@ -1,13 +1,6 @@
 @php
     $settings = app(\App\Services\Settings\SettingsRepository::class);
     $orgName = $settings->get('org.name') ?: config('app.name');
-    $socials = array_filter([
-        'Facebook' => $settings->get('social.facebook'),
-        'Instagram' => $settings->get('social.instagram'),
-        'Twitter' => $settings->get('social.twitter'),
-        'LinkedIn' => $settings->get('social.linkedin'),
-        'YouTube' => $settings->get('social.youtube'),
-    ]);
     $address = trim(implode(', ', array_filter([
         $settings->get('org.address_line1'),
         $settings->get('org.address_line2'),
@@ -70,13 +63,8 @@
             @if ($settings->get('org.tagline'))
                 <p class="mb-4 text-sm text-content-muted">{{ $settings->get('org.tagline') }}</p>
             @endif
-            @if ($socials !== [])
-                <div class="flex gap-3 text-sm text-content-muted">
-                    @foreach ($socials as $label => $url)
-                        <a href="{{ $url }}" target="_blank" rel="noopener" class="hover:text-link">{{ $label }}</a>
-                    @endforeach
-                </div>
-            @endif
+            {{-- Socials moved to the Contact column below (client review, 2026-08-08) and
+                 switched from word-links to icons — see <x-social-links>. --}}
         </div>
 
         <div>
@@ -118,6 +106,8 @@
                     <li><a href="mailto:{{ $settings->get('org.email') }}" class="hover:text-link">{{ $settings->get('org.email') }}</a></li>
                 @endif
             </ul>
+
+            <x-social-links class="mt-4" />
         </div>
     </div>
 
