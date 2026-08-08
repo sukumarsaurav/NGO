@@ -4,6 +4,7 @@
     $homeTitle = "{$orgName} — Donate to Verified NGO Campaigns in India";
     $metaDescription = $settings->get('seo.meta_description') ?: "{$orgName} — donate to verified NGO campaigns in India with instant 80G tax-exemption receipts.";
     $steps = $settings->get('homepage.steps') ?: [];
+    $videos = $settings->get('homepage.videos') ?: [];
     $firstBanner = $banners->first();
 
     // Icon for a "Browse by cause" tile, keyed by keyword match on the category name.
@@ -198,6 +199,36 @@
                     </svg>
                     Donate Now
                 </x-button>
+            </section>
+        @endif
+
+        {{-- 3b. FEATURED VIDEOS — real footage of the work, which is the single strongest
+             authenticity signal available and the reason the client asked for video (see
+             docs/15-CLIENT-FEEDBACK-REMEDIATION-PLAN.md §3). Admin-managed via
+             Organisation Settings → Homepage → Featured videos; the whole section stays
+             hidden until at least one URL is added, so it never ships as an empty shell. --}}
+        @if ($videos !== [])
+            <section class="mb-12">
+                <h2 class="mb-2 text-2xl font-bold text-content">{{ $settings->get('homepage.video_heading') ?: 'See our work' }}</h2>
+                @if ($settings->get('homepage.video_body'))
+                    <p class="mb-6 max-w-2xl text-content-muted">{{ $settings->get('homepage.video_body') }}</p>
+                @else
+                    <div class="mb-6"></div>
+                @endif
+
+                <div class="grid grid-cols-1 gap-6 {{ count($videos) > 1 ? 'sm:grid-cols-2' : '' }}">
+                    @foreach ($videos as $video)
+                        <x-youtube-embed :url="$video['url'] ?? ''" :title="$video['title'] ?? null" />
+                    @endforeach
+                </div>
+
+                @if ($settings->get('social.youtube'))
+                    <p class="mt-4 text-sm">
+                        <a href="{{ $settings->get('social.youtube') }}" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover">
+                            More videos on our YouTube channel →
+                        </a>
+                    </p>
+                @endif
             </section>
         @endif
 

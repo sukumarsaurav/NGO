@@ -101,6 +101,13 @@ class SettingsSeeder extends Seeder
         ['key' => 'homepage.monthly_body', 'value' => null, 'type' => 'string', 'group' => 'homepage'],
         ['key' => 'homepage.steps', 'value' => [], 'type' => 'json', 'group' => 'homepage'],
         ['key' => 'homepage.newsletter_heading', 'value' => null, 'type' => 'string', 'group' => 'homepage'],
+        // Featured YouTube videos — embedded directly, which needs no API key, no access
+        // token and no Meta/Google app review, unlike the Instagram feed. Admin pastes
+        // ordinary watch/share URLs; <x-youtube-embed> extracts the id. See
+        // docs/15-CLIENT-FEEDBACK-REMEDIATION-PLAN.md §3.
+        ['key' => 'homepage.video_heading', 'value' => 'See our work', 'type' => 'string', 'group' => 'homepage'],
+        ['key' => 'homepage.video_body', 'value' => null, 'type' => 'string', 'group' => 'homepage'],
+        ['key' => 'homepage.videos', 'value' => [], 'type' => 'json', 'group' => 'homepage'],
 
         // --- seo -------------------------------------------------------------
         // Kept under 60 characters per docs/07-SEO.md §4 — the settings page

@@ -102,6 +102,7 @@ class OrganisationSettings extends Page
         }
 
         $all['homepage.steps'] ??= [];
+        $all['homepage.videos'] ??= [];
 
         // PAN is never hydrated into the editable field — see panField().
         // Left out entirely so a blank submit can't accidentally wipe it.
@@ -355,6 +356,27 @@ class OrganisationSettings extends Page
                             ->columns(3)
                             ->maxItems(4)
                             ->addActionLabel('Add step'),
+                    ]),
+
+                Section::make('Featured videos')
+                    ->description('Paste ordinary YouTube links — watch, share or embed URLs all work. Leave empty to hide the section.')
+                    ->schema([
+                        TextInput::make(self::fname('homepage.video_heading'))->maxLength(190),
+                        Textarea::make(self::fname('homepage.video_body'))->rows(2),
+                        Repeater::make(self::fname('homepage.videos'))
+                            ->schema([
+                                TextInput::make('url')
+                                    ->label('YouTube URL')
+                                    ->required()
+                                    ->url()
+                                    ->maxLength(255),
+                                TextInput::make('title')
+                                    ->label('Caption (optional)')
+                                    ->maxLength(120),
+                            ])
+                            ->columns(2)
+                            ->maxItems(6)
+                            ->addActionLabel('Add video'),
                     ]),
 
                 Section::make('Newsletter')

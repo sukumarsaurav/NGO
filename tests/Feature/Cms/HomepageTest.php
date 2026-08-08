@@ -8,6 +8,7 @@ use App\Models\CampaignCategory;
 use App\Models\ImpactStat;
 use App\Models\PressMention;
 use App\Models\Testimonial;
+use App\Services\Settings\SettingsRepository;
 use Database\Seeders\SettingsSeeder;
 
 beforeEach(function () {
@@ -76,4 +77,45 @@ it('shows browse-by-cause tiles for active categories', function () {
 
 it('shows a friendly empty state when there are no campaigns at all', function () {
     $this->get('/')->assertOk()->assertSeeText('check back soon');
+});
+
+it('hides the video section when no videos are configured', function () {
+    $this->get('/')->assertOk()->assertDontSee('youtube-nocookie', false);
+});
+
+it('renders configured videos as privacy-friendly lazy embeds', function () {
+    $settings = app(SettingsRepository::class);
+    $settings->set('homepage.videos', [
+        ['url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'title' => 'Food drive'],
+    ]);
+
+    $this->get('/')
+        ->assertOk()
+        // nocookie host, not youtube.com — no tracking cookies before playback.
+        ->assertSee('https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ', false)
+        ->assertSee('loading="lazy"', false)
+        ->assertSeeText('Food drive');
+});
+
+it('extracts the video id from share, shorts and embed url shapes', function () {
+    $settings = app(SettingsRepository::class);
+    $settings->set('homepage.videos', [
+        // The `si=` parameter is what YouTube's own share button produces.
+        ['url' => 'https://youtu.be/aaaaaaaaaaa?si=tracking'],
+        ['url' => 'https://www.youtube.com/shorts/bbbbbbbbbbb'],
+        ['url' => 'https://www.youtube.com/watch?list=PL1&v=ccccccccccc'],
+    ]);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertSee('embed/aaaaaaaaaaa', false)
+        ->assertSee('embed/bbbbbbbbbbb', false)
+        ->assertSee('embed/ccccccccccc', false);
+});
+
+it('renders nothing for a non-youtube url rather than a broken frame', function () {
+    $settings = app(SettingsRepository::class);
+    $settings->set('homepage.videos', [['url' => 'https://example.com/video.mp4']]);
+
+    $this->get('/')->assertOk()->assertDontSee('example.com/video.mp4', false);
 });
