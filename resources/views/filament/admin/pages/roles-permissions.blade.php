@@ -37,7 +37,7 @@
         <button
             type="button"
             wire:click="save"
-            style="margin-top:1.5rem;border-radius:0.375rem;background:#1f7a4d;padding:0.5rem 1rem;font-size:0.875rem;font-weight:600;color:#ffffff;"
+            style="margin-top:1.5rem;border-radius:0.375rem;background:#0d7c2f;padding:0.5rem 1rem;font-size:0.875rem;font-weight:600;color:#ffffff;"
         >
             Save
         </button>

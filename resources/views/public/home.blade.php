@@ -100,10 +100,19 @@
                     @endif
                 @else
                     {{-- Main Title --}}
-                    <h1 class="font-heading text-3xl sm:text-5xl lg:text-6xl font-black text-content uppercase leading-[1.1] tracking-tight mb-4">
+                    {{-- Client-supplied wording (2026-08-08 review). NOTE: this is the
+                         no-banner FALLBACK — if an admin creates a Banner, its own `title`
+                         replaces this entirely (see the `$firstBanner` branch above), so a
+                         banner added later must carry the same wording or the tagline
+                         silently reverts. See docs/15-CLIENT-FEEDBACK-REMEDIATION-PLAN.md §4.
+
+                         `text-5xl` at `lg`, not `text-6xl`: "BETTER TOMORROW" is 15 characters
+                         against the previous "CHANGE"'s 6, and at 6xl the last line overflowed
+                         the scrim's readable area on a 1280px viewport. --}}
+                    <h1 class="font-heading text-3xl sm:text-4xl lg:text-5xl font-black text-content uppercase leading-[1.1] tracking-tight mb-4">
                         TOGETHER, <br/>
-                        WE CAN BRING <br/>
-                        <span class="text-brand-800">CHANGE</span>
+                        WE CAN CREATE A <br/>
+                        <span class="text-brand-800">BETTER TOMORROW</span>
                     </h1>
 
                     {{-- Divider with Heart — see the matching comment in the `$firstBanner` branch above. --}}
@@ -172,7 +181,9 @@
              docs/14-UI-UX-AUDIT-LIVE-SITE-PAGE-BY-PAGE.md §1/§4. --}}
         @if ($impactStats->isNotEmpty())
             <section class="mb-12 text-center">
-                <p class="mb-2 text-sm font-semibold uppercase tracking-wide text-brand-600">Together we can</p>
+                {{-- Echoes the hero's wording rather than the old standalone "Together we can",
+                     which read as a stale fragment once the hero line changed. --}}
+                <p class="mb-2 text-sm font-semibold uppercase tracking-wide text-brand-600">Together, we can</p>
                 <h2 class="mb-2 font-heading text-2xl font-bold text-content sm:text-3xl">Every contribution creates change</h2>
                 <p class="mx-auto mb-8 max-w-xl text-content-muted">Your support turns directly into food, medicine, school fees and shelter — with a receipt to prove it.</p>
 

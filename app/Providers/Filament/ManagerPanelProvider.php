@@ -41,10 +41,10 @@ class ManagerPanelProvider extends PanelProvider
             ->brandLogoHeight('2rem')
             ->favicon(asset('favicon-32x32.png'))
             ->colors([
-                'primary' => Color::hex('#1f7a4d'),
+                'primary' => Color::hex('#0d7c2f'),
                 'danger' => Color::hex('#c0392b'),
                 'warning' => Color::hex('#945b14'),
-                'success' => Color::hex('#1f7a4d'),
+                'success' => Color::hex('#0d7c2f'),
                 'info' => Color::hex('#1f5f7a'),
             ])
             ->darkMode(false)

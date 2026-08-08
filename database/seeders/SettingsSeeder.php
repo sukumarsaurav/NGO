@@ -79,11 +79,19 @@ class SettingsSeeder extends Seeder
         ['key' => 'receipt.80g_deduction_statement', 'value' => 'This donation is eligible for deduction under Section 80G of the Income Tax Act, 1961, subject to the limits and conditions specified therein.', 'type' => 'string', 'group' => 'receipt'],
 
         // --- social --------------------------------------------------------
-        ['key' => 'social.facebook', 'value' => null, 'type' => 'string', 'group' => 'social'],
-        ['key' => 'social.instagram', 'value' => null, 'type' => 'string', 'group' => 'social'],
+        // Live profiles, supplied by the client 2026-08-08. Stored without the `igsh=` /
+        // `si=` query parameters they arrived with — those are per-share referral tokens,
+        // not part of the profile address.
+        //
+        // NOTE: the Facebook value is a `/share/` redirect rather than a vanity URL,
+        // because that is what the client provided; swap it for the canonical page URL
+        // when they confirm it. Twitter/LinkedIn stay null — the client named only three
+        // networks, and <x-social-links> drops any that are blank.
+        ['key' => 'social.facebook', 'value' => 'https://www.facebook.com/share/1TP1e9KajR/', 'type' => 'string', 'group' => 'social'],
+        ['key' => 'social.instagram', 'value' => 'https://www.instagram.com/visiongoodworkglobal', 'type' => 'string', 'group' => 'social'],
         ['key' => 'social.twitter', 'value' => null, 'type' => 'string', 'group' => 'social'],
         ['key' => 'social.linkedin', 'value' => null, 'type' => 'string', 'group' => 'social'],
-        ['key' => 'social.youtube', 'value' => null, 'type' => 'string', 'group' => 'social'],
+        ['key' => 'social.youtube', 'value' => 'https://youtube.com/@visiongoodworkglobal', 'type' => 'string', 'group' => 'social'],
 
         // --- homepage — sections 6-8, docs/06-UI-UX-FOUNDATION.md §7 ---------
         ['key' => 'homepage.serve_heading', 'value' => null, 'type' => 'string', 'group' => 'homepage'],

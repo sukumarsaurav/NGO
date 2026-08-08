@@ -46,7 +46,7 @@
             <p style="font-size:0.875rem;font-weight:500;">Donation series gaps: {{ count($gaps['donation']) }}</p>
             <p style="font-size:0.875rem;font-weight:500;">80G series gaps: {{ count($gaps['80g']) }}</p>
             @if (count($gaps['donation']) === 0 && count($gaps['80g']) === 0)
-                <p style="margin-top:0.25rem;font-size:0.75rem;color:#1f7a4d;">Gap-free — as it should always be.</p>
+                <p style="margin-top:0.25rem;font-size:0.75rem;color:#0d7c2f;">Gap-free — as it should always be.</p>
             @else
                 <p style="margin-top:0.25rem;font-size:0.75rem;color:#c0392b;">
                     Missing sequence numbers found. Donation: {{ implode(', ', $gaps['donation']) }}

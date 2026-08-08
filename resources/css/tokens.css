@@ -15,17 +15,31 @@
      1. PRIMITIVES — raw values, no meaning attached
      --------------------------------------------------------------------------------- */
 
-  /* Brand — green. The donate button. */
-  --brand-50:  #f2f7f4;
-  --brand-100: #e0ece6;
-  --brand-200: #bcd7ca;
-  --brand-300: #8fbca6;
-  --brand-400: #579b7a;
-  --brand-500: #1f7a4d;   /* white 5.32 */
-  --brand-600: #19643f;   /* white 7.15 */
-  --brand-700: #145133;   /* white 9.31 */
-  --brand-800: #103d26;   /* white 12.23 */
-  --brand-900: #0b291a;   /* white 15.60 */
+  /* Brand — green. The donate button.
+     Derived from the logo's own wordmark green, sampled from
+     public/images/branding/logo-horizontal.png: #0c722b — hue 138.2°, saturation 0.81.
+     The previous ramp sat at hue ~150° (visibly more teal), so the header logo and the
+     header's own buttons were two different greens. See
+     docs/15-CLIENT-FEEDBACK-REMEDIATION-PLAN.md §1.
+
+     Each step is solved for the CONTRAST RATIO of the step it replaces, not for its HSL
+     lightness — matching lightness does not preserve contrast, because this hue carries
+     more luminance in the green channel. (Matching lightness instead drops -500 to 4.46
+     and fails white button text outright.) Every ratio below therefore meets or beats
+     the value it replaces; the six load-bearing pairings are re-verified in the plan doc.
+
+     Saturation is curved rather than flat: the tints would read mint/neon at the logo's
+     full 0.81, so -50..-300 step down to 0.34-0.50 while -500 and darker carry it fully. */
+  --brand-50:  #f0f7f2;   /* white 1.09 */
+  --brand-100: #daeee0;   /* white 1.21 */
+  --brand-200: #a8ddb9;   /* white 1.53 */
+  --brand-300: #58c77a;   /* white 2.13 */
+  --brand-400: #26a24c;   /* white 3.30 */
+  --brand-500: #0d7c2f;   /* white 5.33 */
+  --brand-600: #0b6526;   /* white 7.23 */
+  --brand-700: #09521f;   /* white 9.38 */
+  --brand-800: #073e18;   /* white 12.27 */
+  --brand-900: #042a10;   /* white 15.63 */
 
   /* Accent — amber. Carries DARK text only. */
   --accent-50:  #fdf8f2;
