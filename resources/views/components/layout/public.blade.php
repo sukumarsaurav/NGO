@@ -150,23 +150,45 @@
             <div class="header-divider pointer-events-none absolute inset-x-0 bottom-0 h-px bg-line-divider" aria-hidden="true"></div>
             <div class="header-shadow pointer-events-none absolute inset-0 shadow-md" aria-hidden="true"></div>
 
-            <div class="relative mx-auto flex h-16 max-w-container items-center justify-between px-4 sm:px-6">
-                {{-- One `<picture>`, not two `<img>` toggled with `hidden`/`sm:hidden`.
-                     `display: none` does not stop a browser from fetching an `<img>` — both
-                     logos (345 KB combined) were downloading on every single page load
-                     regardless of viewport. `<picture>`'s `<source media>` is evaluated
-                     before any request is made, so only the one actually shown is fetched.
-                     See docs/11-UI-UX-AUDIT-HOME-CAMPAIGNS.md §3.1. --}}
-                <a href="{{ url('/') }}" wire:navigate class="flex items-center rounded-sm" aria-label="{{ $orgName }} — home">
-                    {{-- No `width`/`height` attributes — the two sources have different
-                         intrinsic aspect ratios (32×32 mark, 180×32 horizontal), and a
-                         single `<img>` can only declare one pair. `aspect-square` /
-                         `sm:aspect-[180/32]` reserve the correct box per breakpoint instead,
-                         so there is still no reflow once the image lands. --}}
-                    <picture>
-                        <source media="(min-width: 640px)" srcset="{{ asset('images/branding/logo-horizontal.png') }}">
-                        <img src="{{ asset('images/branding/logo-mark.png') }}" alt="{{ $orgName }}" class="h-8 w-8 aspect-square sm:w-auto sm:aspect-[180/32]">
-                    </picture>
+            {{-- `gap-3` as well as `justify-between`: with the logo now a full lockup rather
+                 than a 32px circle, `justify-between` alone let it butt straight up against
+                 the Donate button once the two together filled the bar. --}}
+            <div class="relative mx-auto flex h-16 max-w-container items-center justify-between gap-3 px-4 sm:px-6">
+                {{-- One image at every breakpoint, not a `<picture>` swapping in the circular
+                     mark below `sm`. That mark is not a mark: it is the whole lockup —
+                     emblem *and* the "VISION GOOD WORK GLOBAL FOUNDATION" wordmark — set
+                     inside a ring, so at the 32px it was rendered at, the organisation's
+                     name was an unreadable smudge and the ring ate a further ~20% of the
+                     box. Client feedback, 2026-08-14: "logo is not clear in mobile view."
+                     There is no space problem to solve here — on a 375px viewport the bar
+                     holds only Donate and the hamburger, leaving ~200px unused to the right
+                     of the logo, which comfortably fits the horizontal lockup.
+
+                     Dropping `<picture>` also drops a request: the mark was a second 152 KB
+                     asset that existed only for this one breakpoint. --}}
+                <a href="{{ url('/') }}" wire:navigate class="flex min-w-0 items-center rounded-sm" aria-label="{{ $orgName }} — home">
+                    {{-- `width`/`height` are the asset's real intrinsic size, so the box is
+                         reserved before the image lands and the header does not reflow.
+                         The source was re-cut for this change: the old file carried ~21%
+                         transparent padding, which shrank the visible logo inside whatever
+                         height we set. Trimmed to its ink, the same CSS height now renders
+                         the lockup about a quarter larger.
+
+                         `h-8` is the largest step on the project's spacing scale that still
+                         clears the Donate button and the hamburger on a 375px viewport: the
+                         trimmed lockup is 6.3:1, so 32px tall is 203px wide, against 215px
+                         of free bar once `gap-3` is taken out. It is held at h-8 on desktop
+                         too — going up a step to h-12 would be 304px wide and crowd the
+                         `lg` nav. `max-w-full object-contain` is the floor below 375px:
+                         narrower phones scale the lockup down proportionally rather than
+                         letting it slide under the button. --}}
+                    <img
+                        src="{{ asset('images/branding/logo-horizontal.png') }}"
+                        alt="{{ $orgName }}"
+                        width="760"
+                        height="120"
+                        class="h-8 w-auto max-w-full object-contain"
+                    >
                 </a>
 
                 <nav class="hidden items-center gap-6 text-sm font-medium lg:flex" aria-label="Main">
