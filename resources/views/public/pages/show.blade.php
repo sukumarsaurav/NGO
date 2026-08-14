@@ -12,10 +12,13 @@
              docs/14-UI-UX-AUDIT-LIVE-SITE-PAGE-BY-PAGE.md §6. --}}
         <section class="relative mb-8 w-screen overflow-hidden px-6 py-12 text-center sm:py-16" style="margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw);">
             <img
-                src="{{ asset('images/hero-community.png') }}"
+                src="{{ asset('images/hero-community.jpg') }}"
                 alt=""
                 aria-hidden="true"
                 loading="lazy"
+                decoding="async"
+                width="1280"
+                height="720"
                 class="absolute inset-0 h-full w-full object-cover"
             >
             <div class="absolute inset-0 bg-brand-900/80"></div>
