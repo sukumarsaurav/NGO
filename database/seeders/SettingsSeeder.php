@@ -63,6 +63,7 @@ class SettingsSeeder extends Seeder
         ['key' => 'donation.min_amount', 'value' => 5000, 'type' => 'int', 'group' => 'donation'],
         ['key' => 'donation.preset_amounts', 'value' => [50000, 100000, 250000, 500000], 'type' => 'json', 'group' => 'donation'],
         ['key' => 'donation.currency', 'value' => 'INR', 'type' => 'string', 'group' => 'donation'],
+        ['key' => 'donation.upi_id', 'value' => null, 'type' => 'string', 'group' => 'donation'],
         ['key' => 'donation.allow_anonymous', 'value' => true, 'type' => 'bool', 'group' => 'donation'],
         ['key' => 'donation.require_pan_above', 'value' => 5000000, 'type' => 'int', 'group' => 'donation'],
         ['key' => 'donation.cash_80g_limit', 'value' => 200000, 'type' => 'int', 'group' => 'donation'],

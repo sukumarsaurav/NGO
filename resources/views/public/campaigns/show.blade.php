@@ -194,12 +194,19 @@
                     </div>
                     <div class="mt-3 flex flex-wrap gap-2">
                         <button type="button" @click="showNgoModal = true" class="cursor-pointer">
-                            <x-badge variant="trust">✓ Government 12A & 80G Registered</x-badge>
+                            {{-- Only claim what the registrations on file support. --}}
+                            <x-badge variant="trust">
+                                @if (\App\Support\TaxExemption::is12aRegistered() && \App\Support\TaxExemption::is80gActive())
+                                    ✓ Government 12A & 80G Registered
+                                @else
+                                    ✓ Registered Section 8 Company
+                                @endif
+                            </x-badge>
                         </button>
                         <button type="button" @click="showNgoModal = true" class="cursor-pointer">
                             <x-badge variant="trust">✓ 100% Fund Transparency</x-badge>
                         </button>
-                        @if ($campaign->is_tax_benefit)
+                        @if ($campaign->is_tax_benefit && \App\Support\TaxExemption::is80gActive())
                             <button type="button" @click="showNgoModal = true" class="cursor-pointer">
                                 <x-badge variant="trust">✓ Instant 80G Tax Receipt</x-badge>
                             </button>
@@ -224,13 +231,33 @@
                                 <span class="text-content-muted">Organization Name</span>
                                 <span class="font-semibold">{{ $orgSettings->get('org.name') ?: config('app.name') }}</span>
                             </div>
+                            {{-- Company registration (MCA) — what the incorporation certificate and
+                                 Section 8 licence on the Certificates page prove. --}}
+                            <div class="flex justify-between py-1 border-b border-line-divider/50">
+                                <span class="text-content-muted">Company Registration (CIN)</span>
+                                <span class="font-mono text-xs bg-success-bg text-success-text px-2 py-1 rounded">{{ $orgSettings->get('org.registration_number') ?: 'Not yet provided' }}</span>
+                            </div>
+                            <div class="flex justify-between py-1 border-b border-line-divider/50">
+                                <span class="text-content-muted">Legal Status</span>
+                                <span class="font-semibold">Section 8 Non-Profit Company</span>
+                            </div>
+                            {{-- A number that has not been entered is shown neutral, not in the
+                                 success-green badge a verified number gets. --}}
                             <div class="flex justify-between py-1 border-b border-line-divider/50">
                                 <span class="text-content-muted">80G Tax Exemption No</span>
-                                <span class="font-mono text-xs bg-success-bg text-success-text px-2 py-1 rounded">{{ $orgSettings->get('org.80g_number') ?: 'Not yet provided' }}</span>
+                                @if ($orgSettings->get('org.80g_number'))
+                                    <span class="font-mono text-xs bg-success-bg text-success-text px-2 py-1 rounded">{{ $orgSettings->get('org.80g_number') }}</span>
+                                @else
+                                    <span class="text-xs text-content-muted">Not yet registered</span>
+                                @endif
                             </div>
                             <div class="flex justify-between py-1 border-b border-line-divider/50">
                                 <span class="text-content-muted">12A Legal Registration</span>
-                                <span class="font-mono text-xs bg-success-bg text-success-text px-2 py-1 rounded">{{ $orgSettings->get('org.12a_number') ?: 'Not yet provided' }}</span>
+                                @if ($orgSettings->get('org.12a_number'))
+                                    <span class="font-mono text-xs bg-success-bg text-success-text px-2 py-1 rounded">{{ $orgSettings->get('org.12a_number') }}</span>
+                                @else
+                                    <span class="text-xs text-content-muted">Not yet registered</span>
+                                @endif
                             </div>
                             <div class="flex justify-between py-1 border-b border-line-divider/50">
                                 <span class="text-content-muted">NITI Aayog Darpan ID</span>
@@ -241,6 +268,9 @@
                                 <span class="font-semibold text-success-text">{{ $orgSettings->get('org.audit_standard') ?: 'Not yet provided' }}</span>
                             </div>
                         </div>
+                        <p class="pt-3 text-center text-xs">
+                            <a href="{{ route('certificates.index') }}" class="font-semibold text-link underline">View our certificates and registration documents</a>
+                        </p>
                         <div class="pt-4 text-center">
                             {{-- `secondary`, not `accent` — this dismisses the modal, it does
                                  not advance the donation. The loudest control in a dialog

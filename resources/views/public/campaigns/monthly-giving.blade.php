@@ -22,7 +22,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <p class="mb-1 font-semibold text-content">Instant monthly receipt</p>
-                <p class="text-xs text-content-muted">An 80G tax-exemption receipt lands in your inbox with every charge.</p>
+                <p class="text-xs text-content-muted">{{ \App\Support\TaxExemption::is80gActive() ? 'An 80G tax-exemption receipt lands in your inbox with every charge.' : 'A receipt lands in your inbox with every charge.' }}</p>
             </div>
             <div class="rounded-lg border border-line-divider bg-surface p-4 text-center">
                 <svg class="mx-auto mb-2 h-6 w-6 text-action" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">

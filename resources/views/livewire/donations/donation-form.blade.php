@@ -85,7 +85,7 @@
                 @endforeach
             </div>
 
-            @if ($amount && (float) $amount > 0)
+            @if ($want80g && $amount && (float) $amount > 0)
                 {{-- Was a hand-rolled div using `border-emerald-200 bg-emerald-50/80
                      text-emerald-900` — all three dead, so this rendered with a near-black
                      border on a transparent background: the single most persuasive line in
@@ -188,6 +188,9 @@
             <x-form.field name="phone" label="Phone" type="tel" required wire:model="phone" autocomplete="tel" />
         </div>
 
+        {{-- Hidden entirely until an 80G registration number is on file — see
+             App\Support\TaxExemption. --}}
+        @if (\App\Support\TaxExemption::is80gActive())
         <div class="mb-4">
             <x-form.checkbox name="want80g" wire:model.live="want80g" :checked="$want80g">
                 I want an 80G tax-exemption receipt
@@ -206,6 +209,7 @@
                 </div>
             @endif
         </div>
+        @endif
 
         <div class="mb-4">
             <x-form.checkbox name="isAnonymous" wire:model.live="isAnonymous" :checked="$isAnonymous">
@@ -260,7 +264,7 @@
         </x-button>
 
         <p class="mt-3 text-center text-xs text-content-muted">
-            &#128274; Secure payment &middot; 80G eligible &middot; UPI &middot; Cards &middot; Net Banking
+            &#128274; Secure payment &middot; @if (\App\Support\TaxExemption::is80gActive())80G eligible &middot; @endif UPI &middot; Cards &middot; Net Banking
         </p>
     @endif
 </div>

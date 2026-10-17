@@ -14,6 +14,9 @@ beforeEach(function () {
     $this->seed(SettingsSeeder::class);
     $this->seed(EmailTemplateSeeder::class);
     $this->admin = User::factory()->create();
+    // These tests exercise the other 80G gates, which only run for a registered org —
+    // issuing needs an 80G number on file (see Generate80GReceipt::assertEligible).
+    app(\App\Services\Settings\SettingsRepository::class)->set('org.80g_number', 'TEST/80G/0001');
 });
 
 it('cannot issue an 80G receipt for a ₹2,500 cash donation, and explains why', function () {

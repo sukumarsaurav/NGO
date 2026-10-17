@@ -1,7 +1,7 @@
 <x-layout.public title="All Campaigns">
     <div class="w-full max-w-6xl">
         <h1 class="mb-2 text-3xl font-bold text-content">Explore Campaigns</h1>
-        <p class="mb-6 text-content-muted">Every campaign here is run by a verified NGO with 80G tax benefits.</p>
+        <p class="mb-6 text-content-muted">Every campaign here is run by a verified NGO{{ \App\Support\TaxExemption::is80gActive() ? ' with 80G tax benefits' : '' }}.</p>
 
         <div class="mb-4 flex flex-wrap gap-2">
             @foreach (['' => 'Newest', 'most-funded' => 'Most funded', 'ending-soon' => 'Ending soon', 'urgent' => 'Urgent'] as $value => $label)
