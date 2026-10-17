@@ -80,7 +80,7 @@
             @if ($campaign->beneficiary_name)
                 <span>by {{ $campaign->beneficiary_name }}</span>
             @endif
-            @if ($campaign->is_tax_benefit)
+            @if ($campaign->is_tax_benefit && \App\Support\TaxExemption::is80gActive())
                 <x-badge variant="trust">Tax Benefit</x-badge>
             @endif
         </div>

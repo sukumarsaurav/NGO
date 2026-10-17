@@ -69,6 +69,16 @@ final class Generate80GReceipt
             );
         }
 
+        // The checks below only run when a validity date is set, so with no registration
+        // at all this used to fall straight through and issue an "80G Tax Exemption
+        // Certificate" whose registration-number field printed "—". A donor can file that
+        // against their tax return. No number, no certificate.
+        if (blank($this->settings->get('org.80g_number'))) {
+            throw new InvalidArgumentException(
+                'The organisation has no 80G registration number on file, so an 80G receipt cannot be issued.'
+            );
+        }
+
         $donor = $donation->donor;
 
         if (! $donor->pan) {

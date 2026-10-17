@@ -2,7 +2,7 @@
     <div class="w-full max-w-2xl">
         <h1 class="mb-2 text-center text-2xl font-bold text-content sm:text-3xl">Certificates &amp; Registrations</h1>
         <p class="mx-auto mb-8 max-w-xl text-center text-content-muted">
-            Our registration and tax-exemption certificates, available to view or download.
+            Our registration and compliance documents, available to view or download.
         </p>
 
         @if ($certificates->isEmpty())

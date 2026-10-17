@@ -37,6 +37,9 @@ beforeEach(function () {
         amount: Money::fromRupees(1000),
     ));
     $this->receipt = app(GenerateDonationReceipt::class)->handle($this->donation);
+    // These tests exercise the other 80G gates, which only run for a registered org —
+    // issuing needs an 80G number on file (see Generate80GReceipt::assertEligible).
+    app(\App\Services\Settings\SettingsRepository::class)->set('org.80g_number', 'TEST/80G/0001');
 });
 
 it('lists receipts', function () {

@@ -281,6 +281,8 @@ class OrganisationSettings extends Page
                     ->schema([
                         TextInput::make(self::fname('donation.min_amount'))->label('Minimum donation (₹)')->numeric()->required()->minValue(1),
                         TextInput::make(self::fname('donation.currency'))->maxLength(3)->required(),
+                        TextInput::make(self::fname('donation.upi_id'))->label('UPI ID for direct payments')->maxLength(100)
+                            ->helperText('Shown with the scan-to-pay QR on the Donate page — hidden when empty. Payments made this way are not tracked automatically; record each one as an offline donation so a receipt is issued.'),
                         Toggle::make(self::fname('donation.allow_anonymous'))->label('Allow anonymous donations'),
                         TextInput::make(self::fname('donation.require_pan_above'))->label('Require PAN above (₹)')->numeric()->required(),
                         TextInput::make(self::fname('donation.cash_80g_limit'))->label('Cash 80G ineligibility limit (₹)')->numeric()->required()

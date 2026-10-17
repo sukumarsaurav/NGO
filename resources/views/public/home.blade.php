@@ -2,7 +2,7 @@
     $settings = app(\App\Services\Settings\SettingsRepository::class);
     $orgName = $settings->get('org.name') ?: config('app.name');
     $homeTitle = "{$orgName} — Donate to Verified NGO Campaigns in India";
-    $metaDescription = $settings->get('seo.meta_description') ?: "{$orgName} — donate to verified NGO campaigns in India with instant 80G tax-exemption receipts.";
+    $metaDescription = $settings->get('seo.meta_description') ?: "{$orgName} — donate to verified NGO campaigns in India".(\App\Support\TaxExemption::is80gActive() ? ' with instant 80G tax-exemption receipts.' : '.');
     $steps = $settings->get('homepage.steps') ?: [];
     $videos = $settings->get('homepage.videos') ?: [];
     $firstBanner = $banners->first();

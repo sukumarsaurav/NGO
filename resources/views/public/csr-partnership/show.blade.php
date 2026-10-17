@@ -21,8 +21,13 @@
                 <p class="text-sm text-content-muted">Every campaign we run is verified, with regular updates showing exactly how funds are used.</p>
             </div>
             <div class="rounded-lg border border-line-divider bg-surface p-4 text-center">
-                <p class="mb-1 font-semibold text-content">80G tax benefit</p>
-                <p class="text-sm text-content-muted">Contributions carry a full 80G tax-exemption receipt for your organisation.</p>
+                @if (\App\Support\TaxExemption::is80gActive())
+                    <p class="mb-1 font-semibold text-content">80G tax benefit</p>
+                    <p class="text-sm text-content-muted">Contributions carry a full 80G tax-exemption receipt for your organisation.</p>
+                @else
+                    <p class="mb-1 font-semibold text-content">Registered non-profit</p>
+                    <p class="text-sm text-content-muted">We are a licensed Section 8 company; our incorporation and licence are published on our Certificates page.</p>
+                @endif
             </div>
             <div class="rounded-lg border border-line-divider bg-surface p-4 text-center">
                 <p class="mb-1 font-semibold text-content">Tailored reporting</p>

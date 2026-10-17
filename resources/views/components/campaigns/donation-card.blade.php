@@ -1,7 +1,9 @@
 @props(['campaign', 'percent'])
 
 @php
-    $hasTaxBenefit = (bool) $campaign->is_tax_benefit;
+    // A "Tax Benefit" pill is only honest when the org holds an active 80G registration —
+    // the per-campaign flag alone is not enough. See App\Support\TaxExemption.
+    $hasTaxBenefit = (bool) $campaign->is_tax_benefit && \App\Support\TaxExemption::is80gActive();
     $hasLiveUpdates = $campaign->updates->isNotEmpty();
     $pillCount = ($hasTaxBenefit ? 1 : 0) + ($hasLiveUpdates ? 1 : 0);
 @endphp

@@ -53,7 +53,11 @@
 
     <p style="font-size: 9pt; color: #4b5563;">
         This receipt acknowledges the donation described above with gratitude.
-        A separate 80G tax-exemption receipt, where applicable, will be issued under its own series.
+        @if (\App\Support\TaxExemption::is80gActive())
+            A separate 80G tax-exemption receipt, where applicable, will be issued under its own series.
+        @else
+            This receipt is not an 80G tax-exemption certificate.
+        @endif
     </p>
 
     <table style="width: 100%; margin-top: 15mm;">

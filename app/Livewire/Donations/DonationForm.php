@@ -15,6 +15,7 @@ use App\Services\Payment\FakeGateway;
 use App\Services\Payment\PaymentGateway;
 use App\Services\Settings\SettingsRepository;
 use App\Support\Money;
+use App\Support\TaxExemption;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\RateLimiter;
 use InvalidArgumentException;
@@ -114,6 +115,13 @@ class DonationForm extends Component
     public function mount(?int $campaignId = null): void
     {
         $this->campaignId = $campaignId;
+
+        // Offer an 80G receipt only when the organisation actually holds an active 80G
+        // registration — see App\Support\TaxExemption. Otherwise the PAN/address block,
+        // the "tax savings" banner and the checkbox are all hidden, and nothing about this
+        // form implies a deduction the donor will not be able to claim.
+        $this->want80g = TaxExemption::is80gActive();
+
         $this->utmData = collect(request()->only(['utm_source', 'utm_medium', 'utm_campaign', 'utm_content']))
             ->filter()
             ->all();
