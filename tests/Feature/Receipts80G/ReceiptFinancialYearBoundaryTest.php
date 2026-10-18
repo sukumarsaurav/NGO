@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\ReceiptSeries;
 use App\Services\Numbering\ReceiptNumberGenerator;
+use App\Services\Settings\SettingsRepository;
 use Carbon\CarbonImmutable;
 use Database\Seeders\SettingsSeeder;
 
@@ -11,7 +12,7 @@ beforeEach(function () {
     $this->seed(SettingsSeeder::class);
     // These tests exercise the other 80G gates, which only run for a registered org —
     // issuing needs an 80G number on file (see Generate80GReceipt::assertEligible).
-    app(\App\Services\Settings\SettingsRepository::class)->set('org.80g_number', 'TEST/80G/0001');
+    app(SettingsRepository::class)->set('org.80g_number', 'TEST/80G/0001');
 });
 
 afterEach(function () {

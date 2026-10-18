@@ -4,17 +4,12 @@ declare(strict_types=1);
 
 namespace App\Actions\Donations;
 
-use App\Models\Campaign;
-use App\Models\CampaignProduct;
 use App\Models\Donation;
 use App\Models\Donor;
 use App\Services\Payment\DTOs\InitiateDonationResult;
 use App\Services\Payment\DTOs\PaymentIntent;
 use App\Services\Payment\PaymentGateway;
-use App\Services\Settings\SettingsRepository;
-use App\Support\FinancialYear;
 use App\Support\Money;
-use InvalidArgumentException;
 
 /**
  * Step 3 of the online donation flow — see docs/modules/M05-donations-payments.md.
@@ -36,7 +31,7 @@ final class InitiateDonation
 {
     public function __construct(
         private readonly PaymentGateway $gateway,
-        private readonly SettingsRepository $settings,
+        private readonly CreatePendingDonation $createPending,
     ) {}
 
     /**
@@ -57,62 +52,22 @@ final class InitiateDonation
         ?string $ipAddress = null,
         array $items = [],
     ): InitiateDonationResult {
-        if ($items !== [] && $campaignId === null) {
-            throw new InvalidArgumentException('Catalogue items require a campaign.');
-        }
+        [$donation, $droppedProductNames] = $this->createPending->handle(
+            donorName: $donorName,
+            donorEmail: $donorEmail,
+            donorPhone: $donorPhone,
+            amount: $amount,
+            campaignId: $campaignId,
+            isAnonymous: $isAnonymous,
+            message: $message,
+            dedicatedTo: $dedicatedTo,
+            source: $source,
+            utmData: $utmData,
+            ipAddress: $ipAddress,
+            items: $items,
+        );
 
-        $campaign = null;
-
-        if ($campaignId !== null) {
-            $campaign = Campaign::query()->find($campaignId);
-
-            // The campaign may have closed, paused or been unpublished between
-            // the donor loading the page and submitting — see M08's "Donation
-            // to a paused campaign" edge case. Never trust the client's belief
-            // that a campaign is still open.
-            if (! $campaign || ! $campaign->status->acceptsDonations()) {
-                throw new InvalidArgumentException('This campaign is not currently accepting donations.');
-            }
-        }
-
-        [$lineItems, $droppedProductNames] = $this->resolveLineItems($campaignId, $items);
-
-        $itemsAmount = array_sum(array_column($lineItems, 'line_total'));
-        $freeAmount = $amount->toPaise();
-        $totalPaise = $itemsAmount + $freeAmount;
-
-        $minAmount = (int) $this->settings->get('donation.min_amount', 0);
-
-        if ($totalPaise < $minAmount) {
-            throw new InvalidArgumentException(
-                'Amount must be at least '.Money::fromPaise($minAmount)->toRupees().' rupees.'
-            );
-        }
-
-        $donor = $this->resolveDonor($donorName, $donorEmail, $donorPhone, $isAnonymous);
-
-        $donation = Donation::query()->create([
-            'donor_id' => $donor->id,
-            'campaign_id' => $campaignId,
-            'amount' => $totalPaise,
-            'items_amount' => $itemsAmount,
-            'free_amount' => $freeAmount,
-            'currency' => $this->settings->get('donation.currency', 'INR'),
-            'type' => 'one_time',
-            'status' => 'pending',
-            'is_offline' => false,
-            'financial_year' => FinancialYear::current()->toString(),
-            'eligible_for_80g' => true,
-            'message' => $message,
-            'dedicated_to' => $dedicatedTo,
-            'source' => $source,
-            'utm_data' => $utmData,
-            'ip_address' => $ipAddress,
-        ]);
-
-        foreach ($lineItems as $lineItem) {
-            $donation->items()->create($lineItem);
-        }
+        $totalPaise = $donation->amount;
 
         $totalMoney = Money::fromPaise($totalPaise);
 
@@ -134,83 +89,5 @@ final class InitiateDonation
         ]);
 
         return new InitiateDonationResult($donation, $order, $droppedProductNames);
-    }
-
-    /**
-     * @param  list<array{product_id: int, quantity: int}>  $items
-     * @return array{0: list<array{campaign_product_id: int, quantity: int, unit_price: int, line_total: int}>, 1: list<string>}
-     */
-    private function resolveLineItems(?int $campaignId, array $items): array
-    {
-        if ($items === []) {
-            return [[], []];
-        }
-
-        $productIds = array_column($items, 'product_id');
-
-        $products = CampaignProduct::query()
-            ->where('campaign_id', $campaignId)
-            ->whereIn('id', $productIds)
-            ->get()
-            ->keyBy('id');
-
-        $lineItems = [];
-        $dropped = [];
-
-        foreach ($items as $item) {
-            $quantity = (int) $item['quantity'];
-
-            if ($quantity < 1) {
-                continue;
-            }
-
-            /** @var CampaignProduct|null $product */
-            $product = $products->get($item['product_id']);
-
-            // Product deactivated (or never existed / belongs to a different
-            // campaign — request tampering) between page load and submit:
-            // drop the line, keep the rest, never silently recalculate a
-            // total the donor has already seen without telling them.
-            if (! $product || ! $product->is_active) {
-                if ($product) {
-                    $dropped[] = $product->name;
-                }
-
-                continue;
-            }
-
-            $lineItems[] = [
-                'campaign_product_id' => $product->id,
-                'quantity' => $quantity,
-                'unit_price' => $product->unit_price,
-                'line_total' => $product->unit_price * $quantity,
-            ];
-        }
-
-        return [$lineItems, $dropped];
-    }
-
-    private function resolveDonor(string $name, string $email, ?string $phone, bool $isAnonymous): Donor
-    {
-        $donor = Donor::findByEmail($email);
-
-        if ($donor) {
-            // Keep the most recent name; see "same email, different name" in
-            // docs/modules/M05-donations-payments.md.
-            $donor->update([
-                'name' => $name,
-                'phone' => $phone ?? $donor->phone,
-                'is_anonymous' => $isAnonymous,
-            ]);
-
-            return $donor->fresh();
-        }
-
-        return Donor::query()->create([
-            'name' => $name,
-            'email' => trim(mb_strtolower($email)),
-            'phone' => $phone,
-            'is_anonymous' => $isAnonymous,
-        ]);
     }
 }

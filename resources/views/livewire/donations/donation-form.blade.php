@@ -99,6 +99,8 @@
             @endif
         </div>
 
+        {{-- A monthly gift is a Razorpay mandate; hidden along with Razorpay until its keys exist. --}}
+        @if ($razorpayEnabled)
         <div class="mb-6">
             <x-form.checkbox name="wantsMonthly" wire:model.live="wantsMonthly" :checked="$wantsMonthly">
                 Make this a monthly donation
@@ -109,6 +111,7 @@
                 </p>
             @endif
         </div>
+        @endif
 
         {{-- "Pay via" — a trust signal the reference has and this page didn't: a donor
              deciding whether to trust a payment form wants to see recognisable payment
@@ -120,10 +123,17 @@
             <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-content-muted">Pay via</p>
             <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-content-muted">
                 <span>UPI</span>
-                <span>Visa</span>
-                <span>Mastercard</span>
-                <span>RuPay</span>
-                <span>Net Banking</span>
+                @if ($razorpayEnabled)
+                    <span>Visa</span>
+                    <span>Mastercard</span>
+                    <span>RuPay</span>
+                    <span>Net Banking</span>
+                @else
+                    <span>Google Pay</span>
+                    <span>PhonePe</span>
+                    <span>Paytm</span>
+                    <span>BHIM</span>
+                @endif
             </div>
         </div>
 
@@ -141,7 +151,7 @@
                 </svg>
             </span>
         </x-button>
-    @else
+    @elseif ($step === 2)
         <button type="button" wire:click="previousStep" class="mb-4 flex min-h-touch items-center gap-1 text-sm font-semibold text-content-muted hover:text-content">
             &larr; Back
         </button>
@@ -149,6 +159,10 @@
         {{-- Shown when Razorpay's script fails to load. This used to be a browser `alert()`
              fired at the exact moment of payment — a modal the donor has to dismiss before
              they can even see the form their details are still sitting in. --}}
+        @error('payment')
+            <x-alert variant="danger" class="mb-4">{{ $message }}</x-alert>
+        @enderror
+
         <div x-show="checkoutError" x-cloak class="mb-4">
             <x-alert variant="danger" title="Secure checkout could not load">
                 Your details are saved. Please check your connection and try again, or contact us
@@ -234,6 +248,35 @@
             </x-form.checkbox>
         </div>
 
+        {{-- Only offered when both ways to pay are live; with one, there is nothing to choose. --}}
+        @if ($razorpayEnabled && $upiEnabled)
+            <fieldset class="mb-6">
+                <legend class="mb-2 text-sm font-semibold text-content">How would you like to pay?</legend>
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <label class="flex cursor-pointer items-start gap-3 rounded-md border border-line p-3 has-[:checked]:border-action has-[:checked]:bg-trust">
+                        <input type="radio" name="paymentMethod" value="razorpay" wire:model.live="paymentMethod" class="mt-1">
+                        <span>
+                            <span class="block text-sm font-semibold text-content">Card, Net Banking or UPI</span>
+                            <span class="block text-xs text-content-muted">Confirmed instantly</span>
+                        </span>
+                    </label>
+                    <label class="flex cursor-pointer items-start gap-3 rounded-md border border-line p-3 has-[:checked]:border-action has-[:checked]:bg-trust">
+                        <input type="radio" name="paymentMethod" value="upi" wire:model.live="paymentMethod" class="mt-1">
+                        <span>
+                            <span class="block text-sm font-semibold text-content">Pay with a UPI app</span>
+                            <span class="block text-xs text-content-muted">Google Pay, PhonePe, Paytm</span>
+                        </span>
+                    </label>
+                </div>
+            </fieldset>
+        @endif
+
+        @if ($paymentMethod === 'upi')
+            <x-button type="button" size="xl" full wire:click="donateUpi" wire:loading.attr="disabled" wire:target="donateUpi">
+                <span wire:loading.remove wire:target="donateUpi">Pay &#8377;{{ number_format($this->totalPaise() / 100) }} by UPI</span>
+                <span wire:loading wire:target="donateUpi">Preparing your payment&hellip;</span>
+            </x-button>
+        @else
         {{-- `xl` is the size §10.1 reserves for the donate CTA. `aria-busy` and the spinner give
              the wait a visible and an announced form — the button previously swapped its label
              silently. --}}
@@ -262,10 +305,103 @@
             </span>
             <span x-show="submitting" x-cloak>Opening secure checkout…</span>
         </x-button>
+        @endif
 
         <p class="mt-3 text-center text-xs text-content-muted">
-            &#128274; Secure payment &middot; @if (\App\Support\TaxExemption::is80gActive())80G eligible &middot; @endif UPI &middot; Cards &middot; Net Banking
+            &#128274; Secure payment &middot; @if (\App\Support\TaxExemption::is80gActive())80G eligible &middot; @endif UPI @if ($razorpayEnabled)&middot; Cards &middot; Net Banking @endif
         </p>
+    @else
+        {{-- STEP 3 — direct UPI payment. The donation exists only as a pending claim; it is
+             confirmed by our team against the bank statement, so nothing on this screen may
+             claim the money has been received. --}}
+        @if ($upiDonation === null)
+            <x-alert variant="warning" class="mb-4">
+                We couldn&rsquo;t find this payment. If you have already paid, please contact us with your UPI reference.
+            </x-alert>
+            <button type="button" wire:click="backToDetails" class="min-h-touch text-sm font-semibold text-link underline">&larr; Back</button>
+        @elseif ($upiReferenceSubmitted)
+            <div class="text-center">
+                <h2 class="mb-2 text-xl font-bold text-content">Thank you &mdash; we&rsquo;ve noted your payment</h2>
+                <p class="mb-4 text-sm text-content-muted">
+                    We will match it against our bank statement and confirm by email at
+                    <strong class="text-content">{{ $email }}</strong>.
+                    @if (\App\Support\TaxExemption::is80gActive() && $want80g)
+                        Your 80G receipt follows once it is confirmed.
+                    @else
+                        Your receipt follows once it is confirmed.
+                    @endif
+                </p>
+                <p class="rounded-md bg-background p-3 text-sm text-content-muted">
+                    Your reference<br>
+                    <span class="font-mono text-base font-semibold text-content">{{ $upiDonation->donation_number }}</span>
+                </p>
+                <p class="mt-4 text-xs text-content-muted">
+                    Not confirmed within 2 working days? Write to
+                    {{ app(\App\Services\Settings\SettingsRepository::class)->get('org.email') ?: 'us' }}
+                    quoting this reference.
+                </p>
+            </div>
+        @else
+            <h2 class="mb-1 text-center text-xl font-bold text-content">Pay &#8377;{{ number_format($upiDonation->amount / 100) }} by UPI</h2>
+            <p class="mb-6 text-center text-sm text-content-muted">
+                To {{ \App\Support\PaymentMethods::upiPayeeName() }}
+            </p>
+
+            {{-- On a phone this hands the amount, payee and note to the donor's UPI app. --}}
+            <a
+                href="{{ $upiLink }}"
+                class="mb-6 flex min-h-touch w-full items-center justify-center rounded-md bg-action px-4 py-3 text-base font-semibold text-action-on transition-colors duration-fast hover:bg-action-hover active:bg-action-active"
+            >
+                Open my UPI app &middot; &#8377;{{ number_format($upiDonation->amount / 100) }}
+            </a>
+
+            <div class="mb-6 rounded-md border border-line-divider p-4 text-center">
+                <p class="mb-3 text-sm text-content-muted">On a computer? Scan this with any UPI app on your phone.</p>
+                <div class="mx-auto w-[12rem] [&_svg]:h-auto [&_svg]:w-full" role="img" aria-label="UPI QR code for &#8377;{{ number_format($upiDonation->amount / 100) }}">
+                    {!! $upiQrSvg !!}
+                </div>
+                <div class="mt-3 text-sm text-content-muted" x-data="{ copied: false }">
+                    UPI ID:
+                    <span class="select-all font-mono font-semibold text-content">{{ \App\Support\PaymentMethods::upiId() }}</span>
+                    <button
+                        type="button"
+                        class="ml-2 min-h-touch rounded-sm px-2 text-xs font-semibold text-link underline"
+                        x-on:click="navigator.clipboard.writeText(@js(\App\Support\PaymentMethods::upiId())).then(() => { copied = true; setTimeout(() => copied = false, 2000) })"
+                    >
+                        <span x-show="!copied">Copy</span><span x-show="copied" x-cloak>Copied</span>
+                    </button>
+                </div>
+                <p class="mt-2 text-xs text-content-muted">
+                    Keep the payment note <span class="font-mono">{{ $upiDonation->donation_number }}</span> as it is &mdash; it is how we find your payment.
+                </p>
+            </div>
+
+            <div class="rounded-md bg-background p-4">
+                <h3 class="mb-1 text-sm font-semibold text-content">After you have paid</h3>
+                <p class="mb-3 text-xs text-content-muted">
+                    Enter the 12-digit UPI reference from your payment app (also called UTR or transaction ID).
+                </p>
+                <x-form.field
+                    name="upiReference"
+                    label="UPI reference"
+                    wire:model="upiReference"
+                    inputmode="numeric"
+                    maxlength="12"
+                    autocomplete="off"
+                    placeholder="e.g. 412345678901"
+                />
+                <div class="mt-4">
+                    <x-button type="button" size="lg" full wire:click="submitUpiReference" wire:loading.attr="disabled" wire:target="submitUpiReference">
+                        <span wire:loading.remove wire:target="submitUpiReference">I have paid &mdash; submit reference</span>
+                        <span wire:loading wire:target="submitUpiReference">Submitting&hellip;</span>
+                    </x-button>
+                </div>
+            </div>
+
+            <button type="button" wire:click="backToDetails" class="mt-4 min-h-touch text-sm font-semibold text-content-muted hover:text-content">
+                &larr; Change details
+            </button>
+        @endif
     @endif
 </div>
 

@@ -44,4 +44,14 @@ class DonationPolicy
     {
         return $user->can('refund_donations');
     }
+
+    /**
+     * Confirming (or rejecting) a direct-UPI payment is recording money that reached the bank
+     * account outside the gateway — the same act as entering an offline donation, so it shares
+     * that ability. A view-only manager gets neither.
+     */
+    public function reviewUpiPayment(User $user, Donation $donation): bool
+    {
+        return $user->can('create_offline_donations');
+    }
 }

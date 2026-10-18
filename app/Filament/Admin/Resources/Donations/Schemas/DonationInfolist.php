@@ -22,6 +22,7 @@ class DonationInfolist
                         TextEntry::make('amount')->money('inr', divideBy: 100),
                         TextEntry::make('status')->badge()->color(fn (DonationStatus $state) => $state->color())->formatStateUsing(fn (DonationStatus $state) => $state->label()),
                         TextEntry::make('payment_mode')->placeholder('—')->formatStateUsing(fn ($state) => $state?->label()),
+                        TextEntry::make('upi_reference')->label('UPI reference')->placeholder('—')->copyable(),
                         TextEntry::make('financial_year'),
                         TextEntry::make('donated_at')->dateTime()->placeholder('—'),
                         TextEntry::make('is_offline')->label('Offline?')->formatStateUsing(fn (bool $state) => $state ? 'Yes' : 'No'),

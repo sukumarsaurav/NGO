@@ -113,14 +113,3 @@ it('refuses to issue an 80G certificate when no 80G number is on file', function
 
     expect(app(Generate80GReceipt::class)->ineligibilityReason($donation))->toBeNull();
 });
-
-it('hides the UPI panel until a UPI ID is set, then shows it', function () {
-    $this->get('/donate')->assertOk()->assertDontSee('Prefer to pay directly by UPI');
-
-    setOrg('donation.upi_id', 'pos.5388436@indus');
-
-    $this->get('/donate')->assertOk()
-        ->assertSee('Prefer to pay directly by UPI')
-        ->assertSee('pos.5388436@indus')
-        ->assertSee('images/payments/upi-qr.jpg');
-});

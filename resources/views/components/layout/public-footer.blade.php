@@ -39,7 +39,11 @@
         ],
     ];
 
-    $payments = ['UPI', 'Visa', 'Mastercard', 'RuPay', 'Net Banking'];
+    // List only what a donor can actually pay with today — see App\Support\PaymentMethods.
+    // Cards and net banking are Razorpay's; with it off, only UPI is accepted.
+    $payments = \App\Support\PaymentMethods::razorpayEnabled()
+        ? ['UPI', 'Visa', 'Mastercard', 'RuPay', 'Net Banking']
+        : (\App\Support\PaymentMethods::upiEnabled() ? ['UPI'] : []);
 
     $credentials = array_filter([
         $settings->get('org.registration_number') ? 'Reg. No: '.$settings->get('org.registration_number') : null,
@@ -177,6 +181,7 @@
                  verifying an NGO looks for exactly these, see docs/06-UI-UX-FOUNDATION.md §3
                  — so they are worth setting as deliberate content rather than debris. --}}
             <div class="flex flex-col gap-6 sm:flex-row sm:justify-between">
+                @if ($payments !== [])
                 <div>
                     <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-content-muted">We accept</p>
                     <ul class="flex flex-wrap gap-2">
@@ -185,6 +190,7 @@
                         @endforeach
                     </ul>
                 </div>
+                @endif
 
                 @if ($credentials !== [])
                     <div>

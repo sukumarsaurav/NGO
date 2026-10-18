@@ -8,6 +8,7 @@ use App\Actions\Receipts\GenerateDonationReceipt;
 use App\Models\Receipt;
 use App\Models\User;
 use App\Services\Payment\DTOs\PaymentResult;
+use App\Services\Settings\SettingsRepository;
 use App\Support\Money;
 use Database\Seeders\SettingsSeeder;
 use Illuminate\Support\Facades\Queue;
@@ -19,7 +20,7 @@ beforeEach(function () {
     Storage::fake('local');
     // These tests exercise the other 80G gates, which only run for a registered org —
     // issuing needs an 80G number on file (see Generate80GReceipt::assertEligible).
-    app(\App\Services\Settings\SettingsRepository::class)->set('org.80g_number', 'TEST/80G/0001');
+    app(SettingsRepository::class)->set('org.80g_number', 'TEST/80G/0001');
 });
 
 it('links a donor to a logged-in user by matching email and shows their donation history', function () {

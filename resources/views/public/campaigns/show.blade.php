@@ -505,5 +505,7 @@
         </script>
     @endif
 
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    @if (\App\Support\PaymentMethods::razorpayEnabled())
+        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    @endif
 </x-layout.public>

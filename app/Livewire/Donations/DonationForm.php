@@ -5,17 +5,22 @@ declare(strict_types=1);
 namespace App\Livewire\Donations;
 
 use App\Actions\Donations\InitiateDonation;
+use App\Actions\Donations\InitiateUpiDonation;
 use App\Actions\Donations\RecordFailedDonation;
 use App\Actions\Donations\RecordSuccessfulDonation;
 use App\Actions\Subscriptions\CreateSubscriptionMandate;
 use App\Enums\MandateType;
 use App\Models\CampaignProduct;
+use App\Models\Donation;
 use App\Services\Payment\DTOs\PaymentResult;
 use App\Services\Payment\FakeGateway;
 use App\Services\Payment\PaymentGateway;
+use App\Services\Qr\QrCodeGenerator;
 use App\Services\Settings\SettingsRepository;
 use App\Support\Money;
+use App\Support\PaymentMethods;
 use App\Support\TaxExemption;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\RateLimiter;
 use InvalidArgumentException;
@@ -93,6 +98,20 @@ class DonationForm extends Component
     public ?string $pendingDonationUuid = null;
 
     /**
+     * 'razorpay' (card / netbanking / UPI through the gateway) or 'upi' (direct to the bank
+     * account, confirmed by an admin). Defaults in mount() to whichever is actually
+     * available; the donor only gets a choice when both are.
+     */
+    public string $paymentMethod = 'razorpay';
+
+    /** The pending direct-UPI donation this donor is now paying. Set when step 3 opens. */
+    public ?string $upiDonationUuid = null;
+
+    public string $upiReference = '';
+
+    public bool $upiReferenceSubmitted = false;
+
+    /**
      * Synced from the sibling `ProductCatalogue` component via the
      * `catalogue-updated` browser event — see that component's docblock for
      * why this is event-based rather than a nested prop. Each entry also
@@ -115,6 +134,12 @@ class DonationForm extends Component
     public function mount(?int $campaignId = null): void
     {
         $this->campaignId = $campaignId;
+
+        // Offer only what can complete. Razorpay without production keys fails at the last
+        // step, so it is hidden until they exist; direct UPI is on whenever a UPI ID is set.
+        // A recurring mandate is a Razorpay feature, so "monthly" goes with it.
+        $this->paymentMethod = PaymentMethods::razorpayEnabled() ? 'razorpay' : 'upi';
+        $this->wantsMonthly = $this->wantsMonthly && PaymentMethods::razorpayEnabled();
 
         // Offer an 80G receipt only when the organisation actually holds an active 80G
         // registration — see App\Support\TaxExemption. Otherwise the PAN/address block,
@@ -259,14 +284,21 @@ class DonationForm extends Component
      * docs/03-ROADMAP.md's Sprint 15 acceptance criterion: "Rate limiting
      * blocks a 100-requests-per-minute donation flood."
      */
-    public function donate(InitiateDonation $initiateDonation, PaymentGateway $gateway): void
+    /**
+     * Rate limit, anonymous-vs-80G conflict, field validation and the catalogue price-change
+     * confirmation — everything that must hold before ANY payment method starts. Shared so the
+     * Razorpay and direct-UPI paths cannot drift apart on what they accept.
+     *
+     * @return bool false when the donor has been told what to fix and the caller must stop
+     */
+    private function passesSubmissionChecks(): bool
     {
         $rateLimitKey = 'donate:'.request()->ip();
 
         if (RateLimiter::tooManyAttempts($rateLimitKey, 10)) {
             $this->addError('rateLimit', 'Too many attempts — please wait a minute and try again.');
 
-            return;
+            return false;
         }
 
         RateLimiter::hit($rateLimitKey, 60);
@@ -274,7 +306,7 @@ class DonationForm extends Component
         if ($this->conflictsWith80gAndAnonymous()) {
             $this->addError('conflict', "An 80G receipt must carry your name and PAN, so it can't be issued for an anonymous donation. Uncheck one to continue.");
 
-            return;
+            return false;
         }
 
         $this->validate();
@@ -312,11 +344,20 @@ class DonationForm extends Component
                 $this->priceChangeOldTotalPaise = $oldItemsTotal + $freeAmountPaise;
                 $this->priceChangeNewTotalPaise = $newItemsTotal + $freeAmountPaise;
 
-                return;
+                return false;
             }
         }
 
         $this->priceChangeConfirmationNeeded = false;
+
+        return true;
+    }
+
+    public function donate(InitiateDonation $initiateDonation, PaymentGateway $gateway): void
+    {
+        if (! $this->passesSubmissionChecks()) {
+            return;
+        }
 
         $amount = Money::fromRupees($this->amount);
 
@@ -395,6 +436,135 @@ class DonationForm extends Component
      * flow entirely". No Checkout.js here; the donor leaves the site for
      * Razorpay's authentication page and returns by redirect.
      */
+    /**
+     * Direct UPI: create a pending claim and move to the payment screen. No gateway, no
+     * money moves here — see InitiateUpiDonation for why this is a claim, not a donation.
+     */
+    public function donateUpi(InitiateUpiDonation $initiateUpiDonation): void
+    {
+        if (! PaymentMethods::upiEnabled()) {
+            $this->addError('payment', 'Direct UPI payment is not available right now.');
+
+            return;
+        }
+
+        if (! $this->passesSubmissionChecks()) {
+            return;
+        }
+
+        $items = array_map(
+            fn (array $item) => ['product_id' => $item['product_id'], 'quantity' => $item['quantity']],
+            $this->selectedItems
+        );
+
+        try {
+            [$donation, $droppedProductNames] = $initiateUpiDonation->handle(
+                donorName: $this->name,
+                donorEmail: $this->email,
+                donorPhone: $this->phone,
+                amount: Money::fromRupees($this->amount),
+                campaignId: $this->campaignId,
+                isAnonymous: $this->isAnonymous,
+                message: $this->message ?: null,
+                utmData: $this->utmData,
+                ipAddress: request()->ip(),
+                items: $items,
+            );
+        } catch (InvalidArgumentException $e) {
+            $this->addError('amount', $e->getMessage());
+
+            return;
+        }
+
+        $this->droppedProductNames = $droppedProductNames;
+
+        if ($this->want80g) {
+            $donation->donor->update([
+                'pan' => $this->pan,
+                'address_line1' => $this->addressLine1,
+                'address_line2' => $this->addressLine2 ?: null,
+                'city' => $this->city,
+                'state' => $this->state,
+                'pincode' => $this->pincode,
+            ]);
+        }
+
+        $this->upiDonationUuid = (string) $donation->uuid;
+        $this->upiReference = '';
+        $this->upiReferenceSubmitted = false;
+        $this->step = 3;
+    }
+
+    /**
+     * The donor reports the 12-digit UPI reference (UTR) shown in their app after paying. It
+     * is only a claim — the donation stays pending until an admin finds that exact reference
+     * on the bank statement.
+     */
+    public function submitUpiReference(): void
+    {
+        $rateLimitKey = 'upi-reference:'.request()->ip();
+
+        if (RateLimiter::tooManyAttempts($rateLimitKey, 10)) {
+            $this->addError('upiReference', 'Too many attempts — please wait a minute and try again.');
+
+            return;
+        }
+
+        RateLimiter::hit($rateLimitKey, 60);
+
+        $this->upiReference = preg_replace('/\s+/', '', $this->upiReference) ?? '';
+
+        $this->validate(
+            ['upiReference' => ['required', 'regex:/^\d{12}$/']],
+            [
+                'upiReference.required' => 'Enter the 12-digit UPI reference from your payment app.',
+                'upiReference.regex' => 'The UPI reference is exactly 12 digits (also called UTR or transaction ID).',
+            ],
+        );
+
+        $donation = $this->upiDonation();
+
+        if ($donation === null || $donation->upi_reference !== null) {
+            $this->addError('upiReference', 'This payment could not be found. Please contact us with your reference.');
+
+            return;
+        }
+
+        try {
+            $donation->update(['upi_reference' => $this->upiReference]);
+        } catch (UniqueConstraintViolationException) {
+            // One bank transaction backs one donation. Say so without revealing whose it is.
+            $this->addError('upiReference', 'That reference has already been submitted. Please check the number, or contact us.');
+
+            return;
+        }
+
+        $this->upiReferenceSubmitted = true;
+    }
+
+    /** Abandon the payment screen and return to the form with the donor's details intact. */
+    public function backToDetails(): void
+    {
+        $this->upiDonationUuid = null;
+        $this->upiReference = '';
+        $this->upiReferenceSubmitted = false;
+        $this->step = 2;
+    }
+
+    private function upiDonation(): ?Donation
+    {
+        if ($this->upiDonationUuid === null) {
+            return null;
+        }
+
+        return Donation::query()
+            ->where('uuid', $this->upiDonationUuid)
+            ->where('status', 'pending')
+            ->where('payment_mode', 'upi')
+            ->where('is_offline', true)
+            ->first();
+    }
+
     private function donateMonthly(Money $amount): void
     {
         try {
@@ -495,6 +665,17 @@ class DonationForm extends Component
 
     public function render()
     {
-        return view('livewire.donations.donation-form');
+        $upiDonation = $this->step === 3 ? $this->upiDonation() : null;
+        $upiLink = $upiDonation
+            ? PaymentMethods::upiLink(Money::fromPaise($upiDonation->amount), (string) $upiDonation->donation_number)
+            : null;
+
+        return view('livewire.donations.donation-form', [
+            'razorpayEnabled' => PaymentMethods::razorpayEnabled(),
+            'upiEnabled' => PaymentMethods::upiEnabled(),
+            'upiDonation' => $upiDonation,
+            'upiLink' => $upiLink,
+            'upiQrSvg' => $upiLink ? app(QrCodeGenerator::class)->svg($upiLink, 200) : null,
+        ]);
     }
 }
