@@ -35,7 +35,7 @@ class Donation extends Model
         'amount', 'items_amount', 'free_amount', 'currency', 'type', 'payment_mode',
         'status', 'is_offline', 'donated_at', 'financial_year', 'eligible_for_80g',
         'message', 'dedicated_to', 'source', 'utm_data', 'ip_address',
-        'recorded_by_user_id', 'notes',
+        'recorded_by_user_id', 'notes', 'upi_reference',
     ];
 
     protected function casts(): array

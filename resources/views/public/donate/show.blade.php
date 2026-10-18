@@ -57,39 +57,9 @@
         <x-impact-stats :stats="$impactStats" class="mb-8" />
 
         @livewire('donations.donation-form')
-
-        {{-- Direct UPI payment. Settings-driven, hidden while `donation.upi_id` is empty.
-             The QR is the bank's own printed card (IndusInd, payee name shown on it), so
-             a donor can confirm who they are paying before they pay.
-
-             NOTE: money arriving this way never passes through the payment gateway, so
-             the app does not see it — an admin has to record it as an offline donation
-             for a receipt to exist. Said here so a donor is not left waiting on one. --}}
-        @php $upiId = app(\App\Services\Settings\SettingsRepository::class)->get('donation.upi_id'); @endphp
-        @if ($upiId)
-            <section class="mt-8 rounded-lg border border-line-divider bg-surface p-4 text-center" aria-labelledby="upi-heading">
-                <h2 id="upi-heading" class="mb-1 text-base font-semibold text-content">Prefer to pay directly by UPI?</h2>
-                <p class="mb-4 text-sm text-content-muted">Scan with any UPI app. The payee shows as our registered foundation.</p>
-                <img
-                    src="{{ asset('images/payments/upi-qr.jpg') }}"
-                    alt="UPI QR code for Vision Good Work Global Foundation, IndusInd Bank"
-                    width="346"
-                    height="561"
-                    loading="lazy"
-                    decoding="async"
-                    class="mx-auto h-auto w-full max-w-[16rem] rounded-md"
-                >
-                <p class="mt-4 text-sm text-content-muted">
-                    UPI ID: <span class="select-all font-mono font-semibold text-content">{{ $upiId }}</span>
-                </p>
-                <p class="mt-2 text-xs text-content-muted">
-                    After paying, email your name and the transaction reference to
-                    {{ app(\App\Services\Settings\SettingsRepository::class)->get('org.email') ?: 'us' }}
-                    so we can send you a receipt.
-                </p>
-            </section>
-        @endif
     </div>
 
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    @if (\App\Support\PaymentMethods::razorpayEnabled())
+        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    @endif
 </x-layout.public>

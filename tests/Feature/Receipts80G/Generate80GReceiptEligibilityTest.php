@@ -16,7 +16,7 @@ beforeEach(function () {
     $this->seed(EmailTemplateSeeder::class);
     // These tests exercise the other 80G gates, which only run for a registered org —
     // issuing needs an 80G number on file (see Generate80GReceipt::assertEligible).
-    app(\App\Services\Settings\SettingsRepository::class)->set('org.80g_number', 'TEST/80G/0001');
+    app(SettingsRepository::class)->set('org.80g_number', 'TEST/80G/0001');
 });
 
 function succeededDonationWithDonorDetails(array $donorOverrides = [], array $donationOverrides = [])
