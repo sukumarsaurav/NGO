@@ -30,8 +30,9 @@
                 name="amount"
                 label="Select Donation Amount (₹)"
                 type="number"
-                min="1"
+                :min="max(1, $minimumRupees)"
                 inputmode="numeric"
+                :hint="$minimumRupees > 1 ? 'Minimum donation: ₹'.number_format($minimumRupees) : null"
                 wire:model.live.debounce.400ms="amount"
             />
 
@@ -160,6 +161,12 @@
              fired at the exact moment of payment — a modal the donor has to dismiss before
              they can even see the form their details are still sitting in. --}}
         @error('payment')
+            <x-alert variant="danger" class="mb-4">{{ $message }}</x-alert>
+        @enderror
+
+        {{-- The amount field is on step 1; an amount problem raised while submitting from here
+             used to have nowhere to appear. --}}
+        @error('amount')
             <x-alert variant="danger" class="mb-4">{{ $message }}</x-alert>
         @enderror
 
