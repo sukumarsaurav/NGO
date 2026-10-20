@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Livewire\Donations\DonationForm;
 use App\Models\Donation;
 use App\Models\Donor;
+use App\Services\Settings\SettingsRepository;
 use Database\Seeders\SettingsSeeder;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Livewire;
@@ -160,4 +161,40 @@ it('rejects an amount below the configured minimum, even though the client sent 
         ->assertNotDispatched('donation-initiated');
 
     expect(Donation::query()->count())->toBe(0);
+});
+
+// --- minimum donation ------------------------------------------------------------------------
+// A donor entering ₹20 once pressed Donate on step 2 and saw nothing: the ₹50 floor was only
+// enforced there, and its error belonged to the amount field on step 1.
+
+it('states the minimum donation next to the amount field', function () {
+    Livewire::test(DonationForm::class)->assertSee('Minimum donation: ₹50');
+});
+
+it('tells the donor the minimum on step 1 instead of advancing', function () {
+    Livewire::test(DonationForm::class)
+        ->set('amount', '20')
+        ->call('nextStep')
+        ->assertSet('step', 1)
+        ->assertHasErrors('amount')
+        ->assertSee('The minimum donation is ₹50');
+});
+
+it('lets a donor continue at exactly the minimum', function () {
+    Livewire::test(DonationForm::class)
+        ->set('amount', '50')
+        ->call('nextStep')
+        ->assertHasNoErrors()
+        ->assertSet('step', 2);
+});
+
+it('follows the minimum set in Organisation Settings', function () {
+    app(SettingsRepository::class)->set('donation.min_amount', 2000); // ₹20
+
+    Livewire::test(DonationForm::class)
+        ->assertSee('Minimum donation: ₹20')
+        ->set('amount', '20')
+        ->call('nextStep')
+        ->assertHasNoErrors()
+        ->assertSet('step', 2);
 });

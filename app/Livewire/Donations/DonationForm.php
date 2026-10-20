@@ -231,9 +231,32 @@ class DonationForm extends Component
         $this->selectedPreset = null;
     }
 
+    /**
+     * The configured floor (`donation.min_amount`), in paise. Enforced again server-side in
+     * CreatePendingDonation; it is checked here too so the donor hears about it on the step
+     * that has the amount field.
+     */
+    public function minimumPaise(): int
+    {
+        return (int) app(SettingsRepository::class)->get('donation.min_amount', 0);
+    }
+
     public function nextStep(): void
     {
         $this->validateOnly('amount');
+
+        // Previously the floor was only enforced on submit, one step later — and the error was
+        // attached to the amount field, which is on step 1. On step 2 nothing displayed it, so a
+        // donor entering ₹20 pressed Donate and simply saw nothing happen. Catch it here, where
+        // the field is, and say what the minimum is.
+        $minimum = $this->minimumPaise();
+
+        if ($this->totalPaise() < $minimum) {
+            $this->addError('amount', 'The minimum donation is ₹'.number_format($minimum / 100).'. Please enter ₹'.number_format($minimum / 100).' or more.');
+
+            return;
+        }
+
         $this->step = 2;
     }
 
@@ -671,6 +694,7 @@ class DonationForm extends Component
             : null;
 
         return view('livewire.donations.donation-form', [
+            'minimumRupees' => (int) ceil($this->minimumPaise() / 100),
             'razorpayEnabled' => PaymentMethods::razorpayEnabled(),
             'upiEnabled' => PaymentMethods::upiEnabled(),
             'upiDonation' => $upiDonation,
