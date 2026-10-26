@@ -23,7 +23,7 @@ class PageForm
                     TextInput::make('title')->required()->maxLength(190)->live(onBlur: true)
                         ->afterStateUpdated(function ($state, $get, $set) {
                             if (blank($get('slug'))) {
-                                $set('slug', str($state)->slug());
+                                $set('slug', (string) str($state)->slug());
                             }
                         }),
                     TextInput::make('slug')

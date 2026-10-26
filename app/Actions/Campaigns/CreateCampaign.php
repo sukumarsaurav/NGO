@@ -29,7 +29,11 @@ final class CreateCampaign
      */
     public function handle(array $attributes): Campaign
     {
-        $attributes['slug'] = $this->uniqueSlug($attributes['slug'] ?? $attributes['title']);
+        // `filled()`, not `??`: a blank slug ('') must fall back to the title rather than slugify to
+        // nothing. `(string)`: callers have passed a Stringable (Str::of()/str()), and the strict
+        // signature below turned that into a TypeError the admin saw only as a generic page error.
+        $source = filled($attributes['slug'] ?? null) ? $attributes['slug'] : $attributes['title'];
+        $attributes['slug'] = $this->uniqueSlug((string) $source);
         $attributes['status'] ??= 'draft';
 
         return Campaign::query()->forceCreate($attributes);

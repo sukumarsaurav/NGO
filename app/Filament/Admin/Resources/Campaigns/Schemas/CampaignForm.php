@@ -36,7 +36,9 @@ class CampaignForm
                         TextInput::make('title')->required()->maxLength(190)->live(onBlur: true)
                             ->afterStateUpdated(function ($state, Get $get, $set) {
                                 if (blank($get('slug'))) {
-                                    $set('slug', str($state)->slug());
+                                    // (string): str()->slug() returns a Stringable object, which would be
+                                    // stored as the field's state and crash CreateCampaign on save.
+                                    $set('slug', (string) str($state)->slug());
                                 }
                             }),
                         TextInput::make('subtitle')->maxLength(255),
