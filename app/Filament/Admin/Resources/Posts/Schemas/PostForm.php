@@ -29,7 +29,7 @@ class PostForm
                         TextInput::make('title')->required()->maxLength(190)->live(onBlur: true)
                             ->afterStateUpdated(function ($state, Get $get, $set) {
                                 if (blank($get('slug'))) {
-                                    $set('slug', str($state)->slug());
+                                    $set('slug', (string) str($state)->slug());
                                 }
                             }),
                         TextInput::make('slug')->required()->maxLength(190)->unique(ignoreRecord: true),

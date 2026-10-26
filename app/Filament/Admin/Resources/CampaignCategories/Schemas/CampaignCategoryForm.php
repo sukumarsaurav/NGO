@@ -26,7 +26,7 @@ class CampaignCategoryForm
             Tabs::make('Category')->tabs([
                 Tab::make('Details')->schema([
                     TextInput::make('name')->required()->maxLength(100)->live(onBlur: true)
-                        ->afterStateUpdated(fn ($state, $set) => $set('slug', str($state)->slug())),
+                        ->afterStateUpdated(fn ($state, $set) => $set('slug', (string) str($state)->slug())),
                     TextInput::make('slug')->required()->maxLength(100)->unique(ignoreRecord: true),
                     FileUpload::make('icon_path')->image()->maxSize(2048)->disk('public')->directory('campaign-categories'),
                     Textarea::make('description')->rows(2)->maxLength(255)
