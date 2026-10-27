@@ -231,16 +231,9 @@
                                 <span class="text-content-muted">Organization Name</span>
                                 <span class="font-semibold">{{ $orgSettings->get('org.name') ?: config('app.name') }}</span>
                             </div>
-                            {{-- Company registration (MCA) — what the incorporation certificate and
-                                 Section 8 licence on the Certificates page prove. --}}
-                            <div class="flex justify-between py-1 border-b border-line-divider/50">
-                                <span class="text-content-muted">Company Registration (CIN)</span>
-                                <span class="font-mono text-xs bg-success-bg text-success-text px-2 py-1 rounded">{{ $orgSettings->get('org.registration_number') ?: 'Not yet provided' }}</span>
-                            </div>
-                            <div class="flex justify-between py-1 border-b border-line-divider/50">
-                                <span class="text-content-muted">Legal Status</span>
-                                <span class="font-semibold">Section 8 Non-Profit Company</span>
-                            </div>
+                            {{-- CIN, licence, incorporation date, PAN and TAN — shared with the Certificates page. --}}
+                            <x-org.registration-details :note="false" />
+
                             {{-- A number that has not been entered is shown neutral, not in the
                                  success-green badge a verified number gets. --}}
                             <div class="flex justify-between py-1 border-b border-line-divider/50">

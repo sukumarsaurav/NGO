@@ -174,6 +174,8 @@ class OrganisationSettings extends Page
                     ->schema([
                         TextInput::make(self::fname('org.registration_number'))->label('Society / Trust / Sec 8 registration')->maxLength(190),
                         TextInput::make(self::fname('org.registration_date'))->maxLength(190),
+                        TextInput::make(self::fname('org.section8_licence_number'))->label('Section 8 licence number')->maxLength(190),
+                        TextInput::make(self::fname('org.tan'))->label('TAN')->maxLength(20),
                         TextInput::make(self::fname('org.12a_number'))->label('12A number')->maxLength(190),
                         TextInput::make(self::fname('org.csr_number'))->label('CSR-1 number')->maxLength(190),
                         TextInput::make(self::fname('org.80g_number'))->label('80G registration number')->maxLength(190),
@@ -183,6 +185,8 @@ class OrganisationSettings extends Page
                         // render after save() flushes the settings cache.
                         TextInput::make(self::fname('org.80g_valid_to'))->label('80G valid to')->helperText($this->eightyGeeHelperText(...)),
                         $this->panField(),
+                        Toggle::make(self::fname('org.pan_public'))->label('Show PAN publicly')
+                            ->helperText('Shows the PAN with the registration details on the Certificates page and campaign pages. It is stored encrypted either way, and receipts use it regardless of this switch.'),
                     ])
                     ->columns(2),
 
