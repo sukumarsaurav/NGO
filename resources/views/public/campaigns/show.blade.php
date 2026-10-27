@@ -468,7 +468,7 @@
 
     <script type="application/ld+json">
         {!! json_encode(array_filter([
-            '@context' => 'https://schema.org',
+            '@@context' => 'https://schema.org',
             '@type' => 'BreadcrumbList',
             'itemListElement' => [
                 ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => url('/')],
@@ -483,7 +483,7 @@
              the catalogue is presentation, not e-commerce. --}}
         <script type="application/ld+json">
             {!! json_encode([
-                '@context' => 'https://schema.org',
+                '@@context' => 'https://schema.org',
                 '@type' => 'FAQPage',
                 'mainEntity' => $faqs->map(fn ($faq) => [
                     '@type' => 'Question',
@@ -496,7 +496,7 @@
     @if ($campaign->status->acceptsDonations())
         <script type="application/ld+json">
             {!! json_encode([
-                '@context' => 'https://schema.org',
+                '@@context' => 'https://schema.org',
                 '@type' => 'DonateAction',
                 'name' => "Donate to {$campaign->title}",
                 'url' => route('campaigns.show', $campaign->slug),

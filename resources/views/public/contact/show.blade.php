@@ -58,6 +58,6 @@
     </div>
 
     <script type="application/ld+json">
-        {!! json_encode(['@context' => 'https://schema.org', '@type' => 'ContactPage', 'url' => url()->current()], JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}
+        {!! json_encode(['@@context' => 'https://schema.org', '@type' => 'ContactPage', 'url' => url()->current()], JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}
     </script>
 </x-layout.public>
