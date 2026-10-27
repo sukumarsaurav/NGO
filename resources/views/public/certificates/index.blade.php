@@ -5,6 +5,11 @@
             Our registration and compliance documents, available to view or download.
         </p>
 
+        <section class="mb-8 rounded-lg border border-line-divider bg-surface p-4" aria-labelledby="registration-heading">
+            <h2 id="registration-heading" class="mb-3 text-base font-semibold text-content">Registration details</h2>
+            <x-org.registration-details />
+        </section>
+
         @if ($certificates->isEmpty())
             <x-empty-state title="No certificates published yet">
                 Check back soon.
