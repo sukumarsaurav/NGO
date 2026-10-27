@@ -58,7 +58,7 @@
 
     @if ($page->slug === 'about')
         <script type="application/ld+json">
-            {!! json_encode(['@context' => 'https://schema.org', '@type' => 'AboutPage', 'name' => $page->title, 'url' => url()->current()], JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}
+            {!! json_encode(['@@context' => 'https://schema.org', '@type' => 'AboutPage', 'name' => $page->title, 'url' => url()->current()], JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}
         </script>
     @endif
 </x-layout.public>

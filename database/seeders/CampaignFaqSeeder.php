@@ -34,7 +34,7 @@ class CampaignFaqSeeder extends Seeder
         return [
             [
                 'question' => 'Do I get a tax benefit for donating?',
-                'answer' => 'Yes. Donations to campaigns marked with the "Tax Benefit" badge are eligible for deduction under Section 80G of the Income Tax Act, 1961, subject to the limits and conditions specified therein. An 80G receipt is generated automatically once you provide your PAN and address.',
+                'answer' => 'Not at the moment. Vision Good Work Global Foundation is a registered Section 8 non-profit company, but our 80G tax-exemption registration is not yet in place, so donations are not currently eligible for an income-tax deduction. We will update this answer as soon as that changes.',
             ],
             [
                 'question' => 'How do I know my donation is actually being used for the cause?',
@@ -46,7 +46,7 @@ class CampaignFaqSeeder extends Seeder
             ],
             [
                 'question' => 'Can I donate anonymously?',
-                'answer' => 'Yes. Check "Donate anonymously" at checkout and your name will never be shown on the public donor wall or in any published material. Note that an 80G tax receipt requires your name and PAN, so it cannot be issued for an anonymous donation.',
+                'answer' => 'Yes. Check "Donate anonymously" at checkout and your name will never be shown on the public donor wall or in any published material.',
             ],
             [
                 'question' => 'Can I set up a monthly donation instead of a one-time gift?',
@@ -54,7 +54,7 @@ class CampaignFaqSeeder extends Seeder
             ],
             [
                 'question' => 'Will I get a receipt for my donation?',
-                'answer' => 'Yes. Every successful donation receives an acknowledgement receipt by email immediately. If you have provided your PAN and address and the donation qualifies, you will also receive a Section 80G tax-exemption certificate.',
+                'answer' => 'Yes. Every successful donation receives an acknowledgement receipt by email.',
             ],
         ];
     }
