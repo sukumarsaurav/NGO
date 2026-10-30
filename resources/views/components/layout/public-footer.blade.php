@@ -45,8 +45,15 @@
         ? ['UPI', 'Visa', 'Mastercard', 'RuPay', 'Net Banking']
         : (\App\Support\PaymentMethods::upiEnabled() ? ['UPI'] : []);
 
+    // Every public identifier, so a visitor on any page can see the foundation is genuine and
+    // check it. Same settings as <x-org.registration-details>; an unset one is simply omitted, and
+    // the PAN only appears when an admin has switched on `org.pan_public`. 12A / 80G are listed
+    // only once their numbers exist — they are claims, not facts we can assume.
     $credentials = array_filter([
-        $settings->get('org.registration_number') ? 'Reg. No: '.$settings->get('org.registration_number') : null,
+        $settings->get('org.registration_number') ? 'CIN: '.$settings->get('org.registration_number') : null,
+        $settings->get('org.section8_licence_number') ? 'Section 8 Licence: '.$settings->get('org.section8_licence_number') : null,
+        ($settings->get('org.pan_public') && $settings->get('org.pan')) ? 'PAN: '.$settings->get('org.pan') : null,
+        $settings->get('org.tan') ? 'TAN: '.$settings->get('org.tan') : null,
         $settings->get('org.12a_number') ? '12A: '.$settings->get('org.12a_number') : null,
         $settings->get('org.80g_number') ? '80G: '.$settings->get('org.80g_number') : null,
     ]);
@@ -200,6 +207,9 @@
                                 <li class="rounded-sm border border-line-divider px-2 py-1 text-xs text-content-muted">{{ $credential }}</li>
                             @endforeach
                         </ul>
+                        <p class="mt-2 text-xs text-content-muted sm:text-right">
+                            <a href="{{ route('certificates.index') }}" wire:navigate class="font-semibold underline transition-colors duration-fast hover:text-link">View our certificates</a>
+                        </p>
                     </div>
                 @endif
             </div>

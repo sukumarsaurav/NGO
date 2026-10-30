@@ -65,3 +65,30 @@ it('does not claim 12A or 80G among the registration details', function () {
         ->assertDontSee('12A')
         ->assertDontSee('80G');
 });
+
+// --- footer: the same numbers, on every page ---------------------------------------------------
+
+it('lists every registration number in the footer of any page', function () {
+    $this->get('/donate')->assertOk()
+        ->assertSee('CIN: U88900UP2026NPL252015')
+        ->assertSee('Section 8 Licence: 191136')
+        ->assertSee('TAN: LKNV11797C')
+        ->assertSee('View our certificates');
+});
+
+it('lists the PAN in the footer only when it is switched on', function () {
+    $this->get('/donate')->assertOk()->assertDontSee('PAN: AAMCV6427F');
+
+    app(SettingsRepository::class)->set('org.pan_public', true);
+
+    $this->get('/donate')->assertOk()->assertSee('PAN: AAMCV6427F');
+});
+
+it('does not list 12A or 80G in the footer until those numbers exist', function () {
+    $this->get('/donate')->assertOk()->assertDontSee('12A:')->assertDontSee('80G:');
+
+    app(SettingsRepository::class)->set('org.12a_number', 'AB/12A/1');
+    app(SettingsRepository::class)->set('org.80g_number', 'AB/80G/1');
+
+    $this->get('/donate')->assertOk()->assertSee('12A: AB/12A/1')->assertSee('80G: AB/80G/1');
+});
